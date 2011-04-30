@@ -13,6 +13,7 @@ namespace todotxtlib.net
         public List<String> Contexts = new List<String>();
         public List<String> Projects = new List<String>();
         private bool _completed;
+        private String Raw = String.Empty;
 
         public bool Completed
         {
@@ -103,6 +104,8 @@ namespace todotxtlib.net
         public Task(String todo, int itemNumber)
         {
             ItemNumber = itemNumber;
+
+            Raw = todo.Replace(Environment.NewLine, ""); //make sure it's just on one line
 
             ParseFields(todo);
         }
