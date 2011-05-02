@@ -44,11 +44,15 @@ namespace todotxtlib.net.tests
             var task1 = new Task("x 2010-12-31 2011-03-01 This task should be completed");
 
             Assert.IsTrue(task1.CompletedDate != null);
-            Assert.AreEqual(task1.CompletedDate, new DateTime(2011, 3, 1));
+            Assert.AreEqual(new DateTime(2011, 3, 1), task1.CompletedDate);
 
             var task2 = new Task("2010-12-31 This task should not be completed");
 
             Assert.IsNull(task2.CompletedDate);
+
+            var task3 = new Task(task1.ToString());
+            Assert.IsTrue(task3.CompletedDate != null);
+            Assert.AreEqual( new DateTime(2011, 3, 1), task3.CompletedDate);
         }
 
         #region Create

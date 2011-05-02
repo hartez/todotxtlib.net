@@ -258,8 +258,8 @@ namespace todotxtlib.net
             return
                 (_completed ? "x " : String.Empty)
                 + (!String.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : String.Empty)
-                + (_completed && CompletedDate.HasValue ? (CompletedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
                 + (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
+                + (_completed && CompletedDate.HasValue ? (CompletedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
                 + Body;
         }
     }
