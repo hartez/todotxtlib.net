@@ -6,36 +6,49 @@ namespace todotxtlib.net
 {
     public class Task
     {
-        public int ItemNumber;
+        public int? ItemNumber;
         public String Priority = String.Empty;
-        public DateTime? Date;
-        public String Text;
+        public DateTime? CreatedDate;
+        public DateTime? CompletedDate;
+        public String Body;
         public List<String> Contexts = new List<String>();
         public List<String> Projects = new List<String>();
         private bool _completed;
-        private String Raw = String.Empty;
+
+        public string Raw { get; set; }
+
+        private string _dueDate = String.Empty;
+        public String DueDate
+        {
+            get { return _dueDate; }
+            set { _dueDate = value; }
+        }
 
         public bool Completed
         {
             get { return _completed; }
+            private set { _completed = value; }
         }
 
-        public void MarkCompleted()
+        public void ToggleCompleted()
         {
-            _completed = true;
+            _completed = !_completed;
 
-            if (IsPriority)
+            if (!_completed && IsPriority)
             {
                 Priority = String.Empty;
             }
 
-            Date = DateTime.Now;
+            if (_completed)
+            {
+                CompletedDate = DateTime.Now;
+            }
         }
 
         public void Empty()
         {
-            Text = String.Empty;
-            Date = null;
+            Body = String.Empty;
+            CreatedDate = null;
             Priority = String.Empty;
             Contexts = new List<String>();
             Projects = new List<String>();
@@ -51,7 +64,6 @@ namespace todotxtlib.net
             {
                 String project = match.Groups[1].Captures[0].Value;
                 Projects.Add(project);
-                todo = todo.Replace(project, String.Empty);
             }
 
             return todo;
@@ -67,7 +79,6 @@ namespace todotxtlib.net
             {
                 String context = match.Groups[1].Captures[0].Value;
                 Contexts.Add(context);
-                todo = todo.Replace(context, String.Empty);
             }
 
             return todo;
@@ -75,13 +86,13 @@ namespace todotxtlib.net
 
         private void ParseEverythingElse(String todo)
         {
-            Match everythingElse = Regex.Match(todo, @"(?:(?<done>[x]) )?(?:\((?<priority>[A-Z])\) )?(?:(?<date>[0-9]{4}-[0-9]{2}-[0-9]{2}) )?(?<todo>.+)$");
+            Match everythingElse = Regex.Match(todo, @"(?:(?<done>[xX]) )?(?:\((?<priority>[A-Z])\) )?(?:(?<date>[0-9]{4}-[0-9]{2}-[0-9]{2}) )?(?<todo>.+)$");
 
             if (everythingElse != Match.Empty)
             {
                 if (everythingElse.Groups["date"].Success)
                 {
-                    Date = DateTime.Parse(everythingElse.Groups["date"].Value);
+                    CreatedDate = DateTime.Parse(everythingElse.Groups["date"].Value);
                 }
 
                 if (everythingElse.Groups["priority"].Success)
@@ -91,7 +102,7 @@ namespace todotxtlib.net
 
                 if (everythingElse.Groups["todo"].Success)
                 {
-                    Text = everythingElse.Groups["todo"].Value;
+                    Body = everythingElse.Groups["todo"].Value;
                 }
 
                 if (everythingElse.Groups["done"].Success)
@@ -101,13 +112,39 @@ namespace todotxtlib.net
             }
         }
 
-        public Task(String todo, int itemNumber)
+        public Task(String raw, int? itemNumber)
         {
             ItemNumber = itemNumber;
 
-            Raw = todo.Replace(Environment.NewLine, ""); //make sure it's just on one line
+            Raw = raw.Replace(Environment.NewLine, ""); //make sure it's just on one line
 
-            ParseFields(todo);
+            ParseFields(raw);
+        }
+
+        public Task(string raw)
+            : this(raw, null)
+        {
+            
+        }
+
+        public Task(string priority, List<string> projects, List<string> contexts, 
+            string body, string dueDate = "", bool completed = false)
+        {
+            Priority = priority.Replace("(", String.Empty).Replace(")", String.Empty);
+            Projects = projects;
+            Contexts = contexts;
+            DueDate = dueDate;
+            Body = body + (Contexts.Count > 0 ? " " : String.Empty)
+                       + String.Join(" ", Contexts.ToArray())
+                       + (Projects.Count > 0 ? " " : String.Empty)
+                       + String.Join(" ", Projects.ToArray());
+            
+            Completed = completed;
+
+            Raw = (_completed ? "x " : String.Empty)
+                   + (!String.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : String.Empty)
+                   + (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
+                   + Body; 
         }
 
         private void ParseFields(String todo)
@@ -127,22 +164,20 @@ namespace todotxtlib.net
 
         public void Append(String toAppend)
         {
-            ParseFields(ToDoProjectContext + toAppend);
+            ParseFields(Body + toAppend);
         }
 
         public void Prepend(String toPrepend)
         {
-            ParseFields(toPrepend + ToDoProjectContext);
+            ParseFields(toPrepend + Body);
         }
 
         public bool ReplaceItemText(string oldText, string newText)
         {
-            String replaceableText = ToDoProjectContext;
-
-            if (replaceableText.Contains(oldText))
+            if (Body.Contains(oldText))
             {
-                replaceableText = replaceableText.Replace(oldText, newText);
-                ParseFields(replaceableText);
+                Body = Body.Replace(oldText, newText);
+                ParseFields(Body);
                 return true;
             }
 
@@ -154,21 +189,14 @@ namespace todotxtlib.net
             get { return !String.IsNullOrEmpty(Priority); }
         }
 
-        private String ToDoProjectContext
-        {
-            get
-            {
-                return Text
-                       + (Projects.Count > 0 ? " " : String.Empty)
-                       + String.Join(" ", Projects.ToArray())
-                       + (Contexts.Count > 0 ? " " : String.Empty)
-                       + String.Join(" ", Contexts.ToArray());
-            }
-        }
-
         public String ToString(String numberFormat)
         {
-            return ItemNumber.ToString(numberFormat) + " " + ToString();
+            if (ItemNumber.HasValue)
+            {
+                return ItemNumber.Value.ToString(numberFormat) + " " + ToString();
+            }
+
+            return ToString();
         }
 
         public override String ToString()
@@ -176,8 +204,8 @@ namespace todotxtlib.net
             return
                 (_completed ? "x " : String.Empty)
                 + (!String.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : String.Empty)
-                + (Date.HasValue ? (Date.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
-                + ToDoProjectContext;
+                + (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
+                + Body;
         }
     }
 }

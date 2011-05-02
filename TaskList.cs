@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace todotxtlib.net
@@ -10,6 +11,11 @@ namespace todotxtlib.net
 
         public TaskList()
         { }
+
+        public TaskList(string filePath)
+        {
+            LoadTasks(filePath);
+        }
 
         public TaskList(IEnumerable<Task> todos, int parentListItemCount)
             : base(todos)
@@ -95,7 +101,7 @@ namespace todotxtlib.net
             return false;
         }
 
-        public void ReplaceToDo(int item, string newText)
+        public void ReplaceInTask(int item, string newText)
         {
             Task target = (from todo in this
                            where todo.ItemNumber == item
@@ -107,7 +113,7 @@ namespace todotxtlib.net
             }
         }
 
-        public void AppendToDo(int item, string newText)
+        public void AppendToTask(int item, string newText)
         {
             Task target = (from todo in this
                            where todo.ItemNumber == item
@@ -119,7 +125,7 @@ namespace todotxtlib.net
             }
         }
 
-        public void PrependToDo(int item, string newText)
+        public void PrependToTask(int item, string newText)
         {
             Task target = (from todo in this
                            where todo.ItemNumber == item
@@ -131,12 +137,12 @@ namespace todotxtlib.net
             }
         }
 
-        public bool RemoveFromItem(int item, string term)
+        public bool RemoveFromTask(int item, string term)
         {
             return ReplaceItemText(item, term, String.Empty);
         }
 
-        public TaskList RemoveCompletedItems(bool preserveLineNumbers)
+        public TaskList RemoveCompletedTasks(bool preserveLineNumbers)
         {
             TaskList completed = ListCompleted();
 
@@ -158,7 +164,7 @@ namespace todotxtlib.net
             return completed;
         }
 
-        public void RemoveItem(int item, bool preserveLineNumbers)
+        public void RemoveTask(int item, bool preserveLineNumbers)
         {
             Task target = (from todo in this
                            where todo.ItemNumber == item
@@ -181,6 +187,68 @@ namespace todotxtlib.net
                         itemNumber += 1;
                     }
                 }
+            }
+        }
+
+        public void LoadTasks(String filePath)
+        {
+            try
+            {
+                Clear();
+
+                var lines = File.ReadAllLines(filePath);
+
+                foreach (var line in lines)
+                {
+                    Add(new Task(line));
+                }
+            }
+            catch (IOException ex)
+            {
+                throw new TaskException("There was a problem trying to read from your todo.txt file", ex);
+            }
+        }
+
+        public void SaveTasks(String filePath)
+        {
+            try
+            {
+                File.WriteAllLines(filePath, this.Select(t => t.ToString()));
+            }
+            catch (IOException ex)
+            {
+                throw new TaskException("There was a problem trying to save your todo.txt file", ex);
+            }
+        }
+
+        /// <summary>
+        /// Deletes a task from this list
+        /// </summary>
+        /// <param name="task">The task to delete from the list</param>
+        /// <returns>True if the task was in the list; false otherwise</returns>
+        public bool Delete(Task task)
+        {
+            try
+            {
+                return (Remove(this.First(t => t.Raw == task.Raw)));
+            }
+            catch (Exception ex)
+            {
+                throw new TaskException("An error occurred while trying to remove your task from the task list file", ex);
+            }
+        }
+
+        public void Update(Task currentTask, Task newTask)
+        {
+            try
+            {
+                var currentIndex = IndexOf(this.First(t => t.Raw == currentTask.Raw));
+
+                this[currentIndex] = newTask;
+            }
+            catch (Exception ex)
+            {
+                throw new TaskException("An error occurred while trying to update your task int the task list file", ex);
             }
         }
     }

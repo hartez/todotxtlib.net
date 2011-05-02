@@ -3,7 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "todotxtlib.net", "todotxtlib.net.csproj", "{D58C0C2D-7F6F-4458-A93D-6D4D7CFB3823}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "todotxtlib.net.tests", "todotxtlib.net.tests\todotxtlib.net.tests.csproj", "{77FE6427-DC8F-41BE-B4FC-35B275B801F8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1DE56233-C732-4FE5-B416-11AF261516A9}"
+	ProjectSection(SolutionItems) = preProject
+		Local.testsettings = Local.testsettings
+		todotxtlib.net.vsmdi = todotxtlib.net.vsmdi
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
+EndProject
 Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = todotxtlib.net.vsmdi
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -13,6 +25,10 @@ Global
 		{D58C0C2D-7F6F-4458-A93D-6D4D7CFB3823}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D58C0C2D-7F6F-4458-A93D-6D4D7CFB3823}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D58C0C2D-7F6F-4458-A93D-6D4D7CFB3823}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77FE6427-DC8F-41BE-B4FC-35B275B801F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77FE6427-DC8F-41BE-B4FC-35B275B801F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77FE6427-DC8F-41BE-B4FC-35B275B801F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77FE6427-DC8F-41BE-B4FC-35B275B801F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

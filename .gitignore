@@ -1,3 +1,9 @@
 bin/*
 obj/*
-
+todotxtlib.net.tests/bin/*
+todotxtlib.net.tests/obj/*
+todotxtlib.net.tests/*.user
+packages/*
+*.testsettings
+packages.config
+*.vsmdi
