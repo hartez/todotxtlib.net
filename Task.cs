@@ -168,8 +168,14 @@ namespace todotxtlib.net
             
         }
 
+        public Task(string priority, List<string> projects, List<string> contexts, string body)
+            : this(priority, projects, contexts, body, null, "", false)
+        {
+            
+        }
+
         public Task(string priority, List<string> projects, List<string> contexts,
-                    string body, DateTime? createdDate = null, string dueDate = "", bool completed = false)
+                    string body, DateTime? createdDate, string dueDate, bool completed)
         {
             Priority = priority.Replace("(", String.Empty).Replace(")", String.Empty).ToUpperInvariant();
            
