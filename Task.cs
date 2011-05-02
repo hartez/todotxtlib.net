@@ -14,14 +14,31 @@ namespace todotxtlib.net
         public List<String> Contexts = new List<String>();
         public List<String> Projects = new List<String>();
         private bool _completed;
+        public Dictionary<string, string> Metadata = new Dictionary<string, string>();
 
         public string Raw { get; set; }
 
-        private string _dueDate = String.Empty;
         public String DueDate
         {
-            get { return _dueDate; }
-            set { _dueDate = value; }
+            get
+            {
+                if(Metadata.ContainsKey("due"))
+                {
+                    return Metadata["due"];
+                }
+
+                return String.Empty;
+            }
+            set {
+                if (Metadata.ContainsKey("due"))
+                {
+                    Metadata["due"] = value;
+                }
+                else
+                {
+                    Metadata.Add("due", value);
+                }
+            }
         }
 
         public bool Completed
@@ -54,7 +71,7 @@ namespace todotxtlib.net
             Projects = new List<String>();
         }
 
-        private String ParseProjects(String todo)
+        private void ParseProjects(String todo)
         {
             Projects.Clear();
 
@@ -65,11 +82,9 @@ namespace todotxtlib.net
                 String project = match.Groups[1].Captures[0].Value;
                 Projects.Add(project);
             }
-
-            return todo;
         }
 
-        private String ParseContexts(String todo)
+        private void ParseContexts(string todo)
         {
             Contexts.Clear();
 
@@ -80,8 +95,20 @@ namespace todotxtlib.net
                 String context = match.Groups[1].Captures[0].Value;
                 Contexts.Add(context);
             }
+        }
 
-            return todo;
+        private void ParseMetaData(string todo)
+        {
+            Metadata.Clear();
+
+            MatchCollection metadata = Regex.Matches(todo, @"\s(?<meta>\w+:.\S*)");
+
+            foreach (Match match in metadata)
+            {
+                String data = match.Groups[1].Captures[0].Value;
+                var kvp = data.Split(':');
+                Metadata.Add(kvp[0], kvp[1]);
+            }
         }
 
         private void ParseEverythingElse(String todo)
@@ -128,16 +155,19 @@ namespace todotxtlib.net
         }
 
         public Task(string priority, List<string> projects, List<string> contexts, 
-            string body, string dueDate = "", bool completed = false)
+            string body, DateTime? createdDate = null, string dueDate = "", bool completed = false)
         {
             Priority = priority.Replace("(", String.Empty).Replace(")", String.Empty);
             Projects = projects;
             Contexts = contexts;
+            CreatedDate = createdDate;
             DueDate = dueDate;
+
             Body = body + (Contexts.Count > 0 ? " " : String.Empty)
                        + String.Join(" ", Contexts.ToArray())
                        + (Projects.Count > 0 ? " " : String.Empty)
-                       + String.Join(" ", Projects.ToArray());
+                       + String.Join(" ", Projects.ToArray())
+                       + (String.IsNullOrEmpty(dueDate) ? String.Empty : " due:" + dueDate);
             
             Completed = completed;
 
@@ -149,8 +179,9 @@ namespace todotxtlib.net
 
         private void ParseFields(String todo)
         {
-            todo = ParseContexts(todo);
-            todo = ParseProjects(todo);
+            ParseContexts(todo);
+            ParseProjects(todo);
+            ParseMetaData(todo);
 
             todo = todo.Trim();
 
