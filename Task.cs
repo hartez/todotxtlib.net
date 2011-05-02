@@ -122,7 +122,7 @@ namespace todotxtlib.net
 
         private void ParseEverythingElse(String todo)
         {
-            Match everythingElse = Regex.Match(todo, @"(?:(?<done>[xX]) )?(?:\((?<priority>[A-Z])\) )?(?:(?<createddate>[0-9]{4}-[0-9]{2}-[0-9]{2}) )?(?:(?<completeddate>[0-9]{4}-[0-9]{2}-[0-9]{2}) )?(?<todo>.+)$");
+            Match everythingElse = Regex.Match(todo, @"(?:(?<done>[xX] (?:(?<completeddate>[0-9]{4}-[0-9]{2}-[0-9]{2}) )))?(?:\((?<priority>[A-Z])\) )?(?:(?<createddate>[0-9]{4}-[0-9]{2}-[0-9]{2}) )?(?<todo>.+)$");
 
             if (everythingElse != Match.Empty)
             {
@@ -169,13 +169,13 @@ namespace todotxtlib.net
         }
 
         public Task(string priority, List<string> projects, List<string> contexts, string body)
-            : this(priority, projects, contexts, body, null, "", false)
+            : this(priority, projects, contexts, body, null, "", false, null)
         {
             
         }
 
         public Task(string priority, List<string> projects, List<string> contexts,
-                    string body, DateTime? createdDate, string dueDate, bool completed)
+                    string body, DateTime? createdDate, string dueDate, bool completed, DateTime? completedDate)
         {
             Priority = priority.Replace("(", String.Empty).Replace(")", String.Empty).ToUpperInvariant();
            
@@ -199,6 +199,7 @@ namespace todotxtlib.net
                    + (String.IsNullOrEmpty(dueDate) ? String.Empty : " due:" + dueDate);
 
             Completed = completed;
+            CompletedDate = completedDate;
 
             Raw = (_completed ? "x " : String.Empty)
                   + (!String.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : String.Empty)
@@ -263,9 +264,9 @@ namespace todotxtlib.net
         {
             return
                 (_completed ? "x " : String.Empty)
+                + (_completed && CompletedDate.HasValue ? (CompletedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
                 + (!String.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : String.Empty)
                 + (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
-                + (_completed && CompletedDate.HasValue ? (CompletedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
                 + Body;
         }
     }

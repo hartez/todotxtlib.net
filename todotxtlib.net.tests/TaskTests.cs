@@ -41,7 +41,7 @@ namespace todotxtlib.net.tests
         [Test]
         public void CompletedDate()
         {
-            var task1 = new Task("x 2010-12-31 2011-03-01 This task should be completed");
+            var task1 = new Task("x 2011-03-01 2010-12-31 This task should be completed");
 
             Assert.IsTrue(task1.CompletedDate != null);
             Assert.AreEqual(new DateTime(2011, 3, 1), task1.CompletedDate);
@@ -52,7 +52,7 @@ namespace todotxtlib.net.tests
 
             var task3 = new Task(task1.ToString());
             Assert.IsTrue(task3.CompletedDate != null);
-            Assert.AreEqual( new DateTime(2011, 3, 1), task3.CompletedDate);
+            Assert.AreEqual(new DateTime(2011, 3, 1), task3.CompletedDate);
         }
 
         #region Create
@@ -113,10 +113,16 @@ namespace todotxtlib.net.tests
         [Test]
         public void Create_Completed()
         {
+            // Not completed - the completed date is required
             var task = new Task("X (A) This is a test task @work +test ");
 
-            var expectedTask = new Task("(A)", _projects, _contexts, "This is a test task", null, "", true);
-            AssertEquivalence(expectedTask, task);
+            Assert.IsFalse(task.Completed);
+
+            // Completed
+            var task2 = new Task("X 2005-06-03 This is a test task @work +test ");
+
+            var expectedTask = new Task("", _projects, _contexts, "This is a test task", null, "", true, new DateTime(2005, 6, 3));
+            AssertEquivalence(expectedTask, task2);
         }
 
         [Test]
@@ -151,7 +157,7 @@ namespace todotxtlib.net.tests
         {
             var task = new Task("(A) This is a test task @work @home +test due:2011-05-08");
 
-            var expectedTask = new Task("(A)", _projects, new List<string>() { "@work", "@home" }, "This is a test task", null, "2011-05-08", false);
+            var expectedTask = new Task("(A)", _projects, new List<string>() { "@work", "@home" }, "This is a test task", null, "2011-05-08", false, null);
             AssertEquivalence(expectedTask, task);
         }
 

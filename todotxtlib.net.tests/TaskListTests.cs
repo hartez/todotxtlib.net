@@ -169,9 +169,22 @@ namespace todotxtlib.net.tests
         [Test]
         public void ToggleComplete_Off_InCollection()
         {
+            // Not complete - doesn't include completed date
             var task = new Task("X (B) ToggleComplete_Off_InCollection +test @task");
             var tl = new TaskList(_testDataPath);
             tl.Add(task);
+
+            task = tl.Last();
+
+            task.ToggleCompleted();
+
+            task = tl.Last();
+
+            Assert.IsTrue(task.Completed);
+
+            var task2 = new Task("X 2011-02-25 ToggleComplete_Off_InCollection +test @task");
+            
+            tl.Add(task2);
 
             task = tl.Last();
 
