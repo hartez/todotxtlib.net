@@ -6,14 +6,23 @@ namespace todotxtlib.net
 {
     public class Task
     {
+        private bool _completed;
+        private string _priority = String.Empty;
+
         public int? ItemNumber;
-        public String Priority = String.Empty;
+
+        public String Priority
+        {
+            get { return _priority; }
+            set { _priority = value.ToUpperInvariant(); }
+        }
+
         public DateTime? CreatedDate;
         public DateTime? CompletedDate;
         public String Body;
         public List<String> Contexts = new List<String>();
         public List<String> Projects = new List<String>();
-        private bool _completed;
+        
         public Dictionary<string, string> Metadata = new Dictionary<string, string>();
 
         public string Raw { get; set; }
@@ -154,27 +163,36 @@ namespace todotxtlib.net
             
         }
 
-        public Task(string priority, List<string> projects, List<string> contexts, 
-            string body, DateTime? createdDate = null, string dueDate = "", bool completed = false)
+        public Task(string priority, List<string> projects, List<string> contexts,
+                    string body, DateTime? createdDate = null, string dueDate = "", bool completed = false)
         {
-            Priority = priority.Replace("(", String.Empty).Replace(")", String.Empty);
-            Projects = projects;
-            Contexts = contexts;
+            Priority = priority.Replace("(", String.Empty).Replace(")", String.Empty).ToUpperInvariant();
+           
+            if (projects != null)
+            {
+                Projects = projects;
+            }
+            
+            if (contexts != null)
+            {
+                Contexts = contexts;
+            }
+            
             CreatedDate = createdDate;
             DueDate = dueDate;
 
             Body = body + (Contexts.Count > 0 ? " " : String.Empty)
-                       + String.Join(" ", Contexts.ToArray())
-                       + (Projects.Count > 0 ? " " : String.Empty)
-                       + String.Join(" ", Projects.ToArray())
-                       + (String.IsNullOrEmpty(dueDate) ? String.Empty : " due:" + dueDate);
-            
+                   + String.Join(" ", Contexts.ToArray())
+                   + (Projects.Count > 0 ? " " : String.Empty)
+                   + String.Join(" ", Projects.ToArray())
+                   + (String.IsNullOrEmpty(dueDate) ? String.Empty : " due:" + dueDate);
+
             Completed = completed;
 
             Raw = (_completed ? "x " : String.Empty)
-                   + (!String.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : String.Empty)
-                   + (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
-                   + Body; 
+                  + (!String.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : String.Empty)
+                  + (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
+                  + Body;
         }
 
         private void ParseFields(String todo)

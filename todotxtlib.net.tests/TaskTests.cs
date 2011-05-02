@@ -9,6 +9,34 @@ namespace todotxtlib.net.tests
         List<string> _projects = new List<string>() { "+test" };
         List<string> _contexts = new List<string>() { "@work" };
 
+        [Test]
+        public void Priority_Case()
+        {
+            // Should have a priority of A
+            var task1 = new Task("(A) This is a test task");
+
+            // Doesn't fit the priority rule - should have no priority
+            var task2 = new Task("(a) This is a test task");
+
+            // Should have a priority of A
+            var task3 = new Task("A", null, null, "This is a test task");
+
+            // Should fix up the priority in the constructor
+            var task4 = new Task("a", null, null, "This is a test task");
+
+            Assert.AreEqual(task1.Priority, "A");
+            Assert.AreEqual(task3.Priority, "A");
+            Assert.AreEqual(task4.Priority, "A");
+
+            Assert.AreEqual(task2.Priority, "");
+            Assert.AreEqual(task2.Body, "(a) This is a test task");
+
+            // The setter should fix this up
+            task2.Priority = "a";
+            Assert.AreEqual(task2.Priority, "A");
+            Assert.AreEqual(task2.Body, "(a) This is a test task");
+        }
+
         #region Create
         [Test]
         public void Create_Priority_Body_Project_Context()
