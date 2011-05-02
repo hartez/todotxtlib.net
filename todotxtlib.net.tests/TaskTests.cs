@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace todotxtlib.net.tests
@@ -35,6 +36,19 @@ namespace todotxtlib.net.tests
             task2.Priority = "a";
             Assert.AreEqual(task2.Priority, "A");
             Assert.AreEqual(task2.Body, "(a) This is a test task");
+        }
+
+        [Test]
+        public void CompletedDate()
+        {
+            var task1 = new Task("x 2010-12-31 2011-03-01 This task should be completed");
+
+            Assert.IsTrue(task1.CompletedDate != null);
+            Assert.AreEqual(task1.CompletedDate, new DateTime(2011, 3, 1));
+
+            var task2 = new Task("2010-12-31 This task should not be completed");
+
+            Assert.IsNull(task2.CompletedDate);
         }
 
         #region Create

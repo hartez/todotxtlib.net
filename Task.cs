@@ -122,13 +122,18 @@ namespace todotxtlib.net
 
         private void ParseEverythingElse(String todo)
         {
-            Match everythingElse = Regex.Match(todo, @"(?:(?<done>[xX]) )?(?:\((?<priority>[A-Z])\) )?(?:(?<date>[0-9]{4}-[0-9]{2}-[0-9]{2}) )?(?<todo>.+)$");
+            Match everythingElse = Regex.Match(todo, @"(?:(?<done>[xX]) )?(?:\((?<priority>[A-Z])\) )?(?:(?<createddate>[0-9]{4}-[0-9]{2}-[0-9]{2}) )?(?:(?<completeddate>[0-9]{4}-[0-9]{2}-[0-9]{2}) )?(?<todo>.+)$");
 
             if (everythingElse != Match.Empty)
             {
-                if (everythingElse.Groups["date"].Success)
+                if (everythingElse.Groups["createddate"].Success)
                 {
-                    CreatedDate = DateTime.Parse(everythingElse.Groups["date"].Value);
+                    CreatedDate = DateTime.Parse(everythingElse.Groups["createddate"].Value);
+                }
+
+                if (everythingElse.Groups["completeddate"].Success)
+                {
+                    CompletedDate = DateTime.Parse(everythingElse.Groups["completeddate"].Value);
                 }
 
                 if (everythingElse.Groups["priority"].Success)
@@ -253,6 +258,7 @@ namespace todotxtlib.net
             return
                 (_completed ? "x " : String.Empty)
                 + (!String.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : String.Empty)
+                + (_completed && CompletedDate.HasValue ? (CompletedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
                 + (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
                 + Body;
         }
