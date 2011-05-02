@@ -213,7 +213,7 @@ namespace todotxtlib.net
         {
             try
             {
-                File.WriteAllLines(filePath, this.Select(t => t.ToString()));
+                File.WriteAllLines(filePath, this.Select(t => t.ToString()).ToArray());
             }
             catch (IOException ex)
             {
