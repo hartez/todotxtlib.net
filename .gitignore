@@ -7,3 +7,7 @@ packages/*
 *.testsettings
 packages.config
 *.vsmdi
+TodotxtLib.WindowsPhone/Bin/*
+TodotxtLib.WindowsPhone/obj/*
+todotxtlib.net.csproj.user
+TodotxtLib.WindowsPhone/TodotxtLib.WindowsPhone.csproj.user
