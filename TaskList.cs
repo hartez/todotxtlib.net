@@ -191,6 +191,35 @@ namespace todotxtlib.net
 			}
 		}
 
+		public void LoadTasks(Stream fileStream)
+		{
+			try
+			{
+				Clear();
+
+				var lines = new List<string>();
+
+				using(var sr = new StreamReader(fileStream))
+				{
+					var line = sr.ReadLine();
+					while(!String.IsNullOrEmpty(line))
+					{
+						lines.Add(line);
+						line = sr.ReadLine();
+					}
+				}
+
+				foreach (string line in lines)
+				{
+					Add(new Task(line));
+				}
+			}
+			catch (IOException ex)
+			{
+				throw new TaskException("There was a problem trying to read from your todo.txt file", ex);
+			}
+		}
+
 		public void LoadTasks(String filePath)
 		{
 			try

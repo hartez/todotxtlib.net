@@ -25,7 +25,20 @@ namespace todotxtlib.net.tests
             var tasks = tl.AsEnumerable();
         }
 
-        [Test]
+		[Test]
+		public void Load_From_Stream()
+		{
+			using(var fs = File.OpenRead(_testDataPath))
+			{
+				var tl = new TaskList();
+
+				tl.LoadTasks(fs);
+
+				Assert.AreEqual(8, tl.Count);
+			}
+		}
+
+    	[Test]
         public void Add_ToCollection()
         {
             var task = new Task("(B) Add_ToCollection +test @task");
