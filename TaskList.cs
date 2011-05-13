@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -55,9 +56,9 @@ namespace todotxtlib.net
                 term = term.Substring(1);
             }
 
-            return new TaskList(from todo in this
-                                where !(include ^ todo.ToString().Contains(term))
-                                select todo, Count);
+            return new TaskList(from task in this
+                                where !(include ^ task.ToString().Contains(term, StringComparison.OrdinalIgnoreCase) )
+                                select task, Count);
         }
 
         public TaskList GetPriority(String priority)
@@ -196,7 +197,7 @@ namespace todotxtlib.net
             {
                 Clear();
 
-                var lines = File.ReadAllLines(filePath);
+				var lines = ReadAllLines(filePath);
 
                 foreach (var line in lines)
                 {
@@ -213,7 +214,7 @@ namespace todotxtlib.net
         {
             try
             {
-                File.WriteAllLines(filePath, this.Select(t => t.ToString()).ToArray());
+                WriteAllLines(filePath, this.Select(t => t.ToString()).ToArray());
             }
             catch (IOException ex)
             {
@@ -251,5 +252,60 @@ namespace todotxtlib.net
                 throw new TaskException("An error occurred while trying to update your task int the task list file", ex);
             }
         }
+
+		public static void WriteAllLines(string path, string[] lines)
+		{
+			FileStream fs = null;
+
+			try
+			{
+				fs = File.Open(path, FileMode.Create, FileAccess.Write);
+
+				var sw = new StreamWriter(fs);
+
+				foreach (var line in lines)
+				{
+					sw.WriteLine(line);
+				}
+
+				sw.Flush();
+			}
+			finally
+			{
+				if (fs != null)
+				{
+					fs.Close();
+				}
+			}
+		}
+
+    	public static string[] ReadAllLines(string path)
+		{
+			FileStream fs = null;
+			var lines = new List<string>();
+
+			try
+			{
+				fs = File.OpenRead(path);
+
+				var sr = new StreamReader(fs);
+				
+				string line = sr.ReadLine();
+				while(!String.IsNullOrEmpty(line))
+				{
+					lines.Add(line);
+					line = sr.ReadLine();
+				}
+
+				return lines.ToArray();
+			}
+			finally
+			{
+				if (fs != null)
+				{
+					fs.Close();
+				}
+			}
+		}
     }
 }

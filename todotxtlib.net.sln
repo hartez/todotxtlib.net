@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodotxtLib.WindowsPhone", "TodotxtLib.WindowsPhone\TodotxtLib.WindowsPhone.csproj", "{72B34FDD-937F-4687-B990-37C859561D90}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = todotxtlib.net.vsmdi
@@ -29,6 +31,10 @@ Global
 		{77FE6427-DC8F-41BE-B4FC-35B275B801F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77FE6427-DC8F-41BE-B4FC-35B275B801F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77FE6427-DC8F-41BE-B4FC-35B275B801F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72B34FDD-937F-4687-B990-37C859561D90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72B34FDD-937F-4687-B990-37C859561D90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72B34FDD-937F-4687-B990-37C859561D90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72B34FDD-937F-4687-B990-37C859561D90}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
