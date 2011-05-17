@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 
 namespace todotxtlib.net
 {
-	public class TaskList : List<Task>
+	public class TaskList : ObservableCollection<Task>
 	{
 		private String _numberFormat;
 
@@ -19,9 +20,12 @@ namespace todotxtlib.net
 		}
 
 		public TaskList(IEnumerable<Task> todos, int parentListItemCount)
-			: base(todos)
 		{
 			_numberFormat = new String('0', parentListItemCount.ToString().Length);
+			foreach (var todo in todos)
+			{
+				Add(todo);
+			}
 		}
 
 		public IEnumerable<String> ToOutput()

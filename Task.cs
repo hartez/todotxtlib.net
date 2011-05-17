@@ -1,273 +1,371 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace todotxtlib.net
 {
-    public class Task
-    {
-        private bool _completed;
-        private string _priority = String.Empty;
+	public class Task : INotifyPropertyChanged
+	{
+		private readonly Dictionary<string, string> _metadata = new Dictionary<string, string>();
+		private string _body;
+		private bool _completed;
 
-        public int? ItemNumber;
+		private DateTime? _completedDate;
+		private List<String> _contexts = new List<String>();
 
-        public String Priority
-        {
-            get { return _priority; }
-            set { _priority = value.ToUpperInvariant(); }
-        }
+		private DateTime? _createdDate;
 
-        public DateTime? CreatedDate;
-        public DateTime? CompletedDate;
-        public String Body;
-        public List<String> Contexts = new List<String>();
-        public List<String> Projects = new List<String>();
-        
-        public Dictionary<string, string> Metadata = new Dictionary<string, string>();
+		private int? _itemNumber;
 
-        public string Raw { get; set; }
+		private string _priority = String.Empty;
+		private List<String> _projects = new List<String>();
+		private string _raw;
 
-        public String DueDate
-        {
-            get
-            {
-                if(Metadata.ContainsKey("due"))
-                {
-                    return Metadata["due"];
-                }
+		public Task(String raw, int? itemNumber)
+		{
+			ItemNumber = itemNumber;
 
-                return String.Empty;
-            }
-            set {
-                if (Metadata.ContainsKey("due"))
-                {
-                    Metadata["due"] = value;
-                }
-                else
-                {
-                    Metadata.Add("due", value);
-                }
-            }
-        }
+			Raw = raw.Replace(Environment.NewLine, ""); //make sure it's just on one line
 
-        public bool Completed
-        {
-            get { return _completed; }
-            private set { _completed = value; }
-        }
+			ParseFields(raw);
+		}
 
-        public void ToggleCompleted()
-        {
-            _completed = !_completed;
+		public Task(string raw)
+			: this(raw, null)
+		{
+		}
 
-            if (!_completed && IsPriority)
-            {
-                Priority = String.Empty;
-            }
+		public Task(string priority, List<string> projects, List<string> contexts, string body)
+			: this(priority, projects, contexts, body, null, "", false, null)
+		{
+		}
 
-            if (_completed)
-            {
-                CompletedDate = DateTime.Now;
-            }
-        }
+		public Task(string priority, List<string> projects, List<string> contexts,
+		            string body, DateTime? createdDate, string dueDate, bool completed, DateTime? completedDate)
+		{
+			Priority = priority.Replace("(", String.Empty).Replace(")", String.Empty).ToUpperInvariant();
 
-        public void Empty()
-        {
-            Body = String.Empty;
-            CreatedDate = null;
-            Priority = String.Empty;
-            Contexts = new List<String>();
-            Projects = new List<String>();
-        }
+			if (projects != null)
+			{
+				_projects = projects;
+			}
 
-        private void ParseProjects(String todo)
-        {
-            Projects.Clear();
+			if (contexts != null)
+			{
+				_contexts = contexts;
+			}
 
-            MatchCollection projects = Regex.Matches(todo, @"\s(\+\w+)");
+			CreatedDate = createdDate;
+			DueDate = dueDate;
 
-            foreach (Match match in projects)
-            {
-                String project = match.Groups[1].Captures[0].Value;
-                Projects.Add(project);
-            }
-        }
+			Body = body + (Contexts.Count() > 0 ? " " : String.Empty)
+			       + String.Join(" ", _contexts.ToArray())
+			       + (Projects.Count() > 0 ? " " : String.Empty)
+			       + String.Join(" ", Projects.ToArray())
+			       + (String.IsNullOrEmpty(dueDate) ? String.Empty : " due:" + dueDate);
 
-        private void ParseContexts(string todo)
-        {
-            Contexts.Clear();
+			Completed = completed;
+			CompletedDate = completedDate;
 
-            MatchCollection contexts = Regex.Matches(todo, @"\s(@\w+)");
+			Raw = (_completed ? "x " : String.Empty)
+			      + (!String.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : String.Empty)
+			      + (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
+			      + Body;
+		}
 
-            foreach (Match match in contexts)
-            {
-                String context = match.Groups[1].Captures[0].Value;
-                Contexts.Add(context);
-            }
-        }
+		public String Body
+		{
+			get { return _body; }
+			private set
+			{
+				_body = value;
+				InvokePropertyChanged(new PropertyChangedEventArgs("Body"));
+			}
+		}
 
-        private void ParseMetaData(string todo)
-        {
-            Metadata.Clear();
+		public DateTime? CompletedDate
+		{
+			get { return _completedDate; }
+			private set
+			{
+				_completedDate = value;
+				InvokePropertyChanged(new PropertyChangedEventArgs("CompletedDate"));
+			}
+		}
 
-            MatchCollection metadata = Regex.Matches(todo, @"\s(?<meta>\w+:.\S*)");
+		public DateTime? CreatedDate
+		{
+			get { return _createdDate; }
+			private set
+			{
+				_createdDate = value;
+				InvokePropertyChanged(new PropertyChangedEventArgs("CreatedDate"));
+			}
+		}
 
-            foreach (Match match in metadata)
-            {
-                String data = match.Groups[1].Captures[0].Value;
-                var kvp = data.Split(':');
-                Metadata.Add(kvp[0], kvp[1]);
-            }
-        }
+		public int? ItemNumber
+		{
+			get { return _itemNumber; }
+			set
+			{
+				_itemNumber = value;
+				InvokePropertyChanged(new PropertyChangedEventArgs("ItemNumber"));
+			}
+		}
 
-        private void ParseEverythingElse(String todo)
-        {
-            Match everythingElse = Regex.Match(todo, @"(?:(?<done>[xX] (?:(?<completeddate>[0-9]{4}-[0-9]{2}-[0-9]{2}) )))?(?:\((?<priority>[A-Z])\) )?(?:(?<createddate>[0-9]{4}-[0-9]{2}-[0-9]{2}) )?(?<todo>.+)$");
+		public IDictionary<string, string> Metadata
+		{
+			get { return _metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value); }
+		}
 
-            if (everythingElse != Match.Empty)
-            {
-                if (everythingElse.Groups["createddate"].Success)
-                {
-                    CreatedDate = DateTime.Parse(everythingElse.Groups["createddate"].Value);
-                }
+		public IEnumerable<String> Projects
+		{
+			get { return _projects.Select(p => p); }
+		}
 
-                if (everythingElse.Groups["completeddate"].Success)
-                {
-                    CompletedDate = DateTime.Parse(everythingElse.Groups["completeddate"].Value);
-                }
+		public IEnumerable<String> Contexts
+		{
+			get { return _contexts.Select(p => p); }
+		}
 
-                if (everythingElse.Groups["priority"].Success)
-                {
-                    Priority = everythingElse.Groups["priority"].Value;
-                }
+		public String Priority
+		{
+			get { return _priority; }
+			set
+			{
+				_priority = value.ToUpperInvariant();
+				InvokePropertyChanged(new PropertyChangedEventArgs("Priority"));
+			}
+		}
 
-                if (everythingElse.Groups["todo"].Success)
-                {
-                    Body = everythingElse.Groups["todo"].Value;
-                }
+		public string Raw
+		{
+			get { return _raw; }
+			set
+			{
+				_raw = value;
+				InvokePropertyChanged(new PropertyChangedEventArgs("Raw"));
+			}
+		}
 
-                if (everythingElse.Groups["done"].Success)
-                {
-                    _completed = true;
-                }
-            }
-        }
+		public String DueDate
+		{
+			get
+			{
+				if (_metadata.ContainsKey("due"))
+				{
+					return _metadata["due"];
+				}
 
-        public Task(String raw, int? itemNumber)
-        {
-            ItemNumber = itemNumber;
+				return String.Empty;
+			}
+			set
+			{
+				if (_metadata.ContainsKey("due"))
+				{
+					_metadata["due"] = value;
+				}
+				else
+				{
+					_metadata.Add("due", value);
+				}
 
-            Raw = raw.Replace(Environment.NewLine, ""); //make sure it's just on one line
+				InvokePropertyChanged(new PropertyChangedEventArgs("DueDate"));
+			}
+		}
 
-            ParseFields(raw);
-        }
+		public bool Completed
+		{
+			get { return _completed; }
+			private set
+			{
+				_completed = value;
+				InvokePropertyChanged(new PropertyChangedEventArgs("Completed"));
+			}
+		}
 
-        public Task(string raw)
-            : this(raw, null)
-        {
-            
-        }
+		public bool IsPriority
+		{
+			get { return !String.IsNullOrEmpty(Priority); }
+		}
 
-        public Task(string priority, List<string> projects, List<string> contexts, string body)
-            : this(priority, projects, contexts, body, null, "", false, null)
-        {
-            
-        }
+		#region INotifyPropertyChanged Members
 
-        public Task(string priority, List<string> projects, List<string> contexts,
-                    string body, DateTime? createdDate, string dueDate, bool completed, DateTime? completedDate)
-        {
-            Priority = priority.Replace("(", String.Empty).Replace(")", String.Empty).ToUpperInvariant();
-           
-            if (projects != null)
-            {
-                Projects = projects;
-            }
-            
-            if (contexts != null)
-            {
-                Contexts = contexts;
-            }
-            
-            CreatedDate = createdDate;
-            DueDate = dueDate;
+		public event PropertyChangedEventHandler PropertyChanged;
 
-            Body = body + (Contexts.Count > 0 ? " " : String.Empty)
-                   + String.Join(" ", Contexts.ToArray())
-                   + (Projects.Count > 0 ? " " : String.Empty)
-                   + String.Join(" ", Projects.ToArray())
-                   + (String.IsNullOrEmpty(dueDate) ? String.Empty : " due:" + dueDate);
+		#endregion
 
-            Completed = completed;
-            CompletedDate = completedDate;
+		public void ToggleCompleted()
+		{
+			_completed = !_completed;
 
-            Raw = (_completed ? "x " : String.Empty)
-                  + (!String.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : String.Empty)
-                  + (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
-                  + Body;
-        }
+			if (!_completed && IsPriority)
+			{
+				Priority = String.Empty;
+			}
 
-        private void ParseFields(String todo)
-        {
-            ParseContexts(todo);
-            ParseProjects(todo);
-            ParseMetaData(todo);
+			if (_completed)
+			{
+				CompletedDate = DateTime.Now;
+			}
+		}
 
-            todo = todo.Trim();
+		public void Empty()
+		{
+			Body = String.Empty;
+			CreatedDate = null;
+			Priority = String.Empty;
+			_contexts = new List<String>();
+			_projects = new List<String>();
+		}
 
-            ParseEverythingElse(todo);
-        }
+		private void ParseProjects(String todo)
+		{
+			_projects.Clear();
 
-        public void Replace(String newTodo)
-        {
-            ParseFields(newTodo);
-        }
+			MatchCollection projects = Regex.Matches(todo, @"\s(\+\w+)");
 
-        public void Append(String toAppend)
-        {
-            ParseFields(Body + toAppend);
-        }
+			foreach (Match match in projects)
+			{
+				String project = match.Groups[1].Captures[0].Value;
+				_projects.Add(project);
+			}
 
-        public void Prepend(String toPrepend)
-        {
-            ParseFields(toPrepend + Body);
-        }
+			InvokePropertyChanged(new PropertyChangedEventArgs("Projects"));
+		}
 
-        public bool ReplaceItemText(string oldText, string newText)
-        {
-            if (Body.Contains(oldText))
-            {
-                Body = Body.Replace(oldText, newText);
-                ParseFields(Body);
-                return true;
-            }
+		private void ParseContexts(string todo)
+		{
+			_contexts.Clear();
 
-            return false;
-        }
+			MatchCollection contexts = Regex.Matches(todo, @"\s(@\w+)");
 
-        public bool IsPriority
-        {
-            get { return !String.IsNullOrEmpty(Priority); }
-        }
+			foreach (Match match in contexts)
+			{
+				String context = match.Groups[1].Captures[0].Value;
+				_contexts.Add(context);
+			}
 
-        public String ToString(String numberFormat)
-        {
-            if (ItemNumber.HasValue)
-            {
-                return ItemNumber.Value.ToString(numberFormat) + " " + ToString();
-            }
+			InvokePropertyChanged(new PropertyChangedEventArgs("Contexts"));
+		}
 
-            return ToString();
-        }
+		private void ParseMetaData(string todo)
+		{
+			_metadata.Clear();
 
-        public override String ToString()
-        {
-            return
-                (_completed ? "x " : String.Empty)
-                + (_completed && CompletedDate.HasValue ? (CompletedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
-                + (!String.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : String.Empty)
-                + (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
-                + Body;
-        }
-    }
+			MatchCollection metadata = Regex.Matches(todo, @"\s(?<meta>\w+:.\S*)");
+
+			foreach (Match match in metadata)
+			{
+				String data = match.Groups[1].Captures[0].Value;
+				string[] kvp = data.Split(':');
+				_metadata.Add(kvp[0], kvp[1]);
+			}
+
+			InvokePropertyChanged(new PropertyChangedEventArgs("Metadata"));
+		}
+
+		private void ParseEverythingElse(String todo)
+		{
+			Match everythingElse = Regex.Match(todo,
+			                                   @"(?:(?<done>[xX] (?:(?<completeddate>[0-9]{4}-[0-9]{2}-[0-9]{2}) )))?(?:\((?<priority>[A-Z])\) )?(?:(?<createddate>[0-9]{4}-[0-9]{2}-[0-9]{2}) )?(?<todo>.+)$");
+
+			if (everythingElse != Match.Empty)
+			{
+				if (everythingElse.Groups["createddate"].Success)
+				{
+					CreatedDate = DateTime.Parse(everythingElse.Groups["createddate"].Value);
+				}
+
+				if (everythingElse.Groups["completeddate"].Success)
+				{
+					CompletedDate = DateTime.Parse(everythingElse.Groups["completeddate"].Value);
+				}
+
+				if (everythingElse.Groups["priority"].Success)
+				{
+					Priority = everythingElse.Groups["priority"].Value;
+				}
+
+				if (everythingElse.Groups["todo"].Success)
+				{
+					Body = everythingElse.Groups["todo"].Value;
+				}
+
+				if (everythingElse.Groups["done"].Success)
+				{
+					_completed = true;
+				}
+			}
+		}
+
+		private void ParseFields(String todo)
+		{
+			ParseContexts(todo);
+			ParseProjects(todo);
+			ParseMetaData(todo);
+
+			todo = todo.Trim();
+
+			ParseEverythingElse(todo);
+		}
+
+		public void Replace(String newTodo)
+		{
+			ParseFields(newTodo);
+		}
+
+		public void Append(String toAppend)
+		{
+			ParseFields(Body + toAppend);
+		}
+
+		public void Prepend(String toPrepend)
+		{
+			ParseFields(toPrepend + Body);
+		}
+
+		public bool ReplaceItemText(string oldText, string newText)
+		{
+			if (Body.Contains(oldText))
+			{
+				Body = Body.Replace(oldText, newText);
+				ParseFields(Body);
+				return true;
+			}
+
+			return false;
+		}
+
+		public String ToString(String numberFormat)
+		{
+			if (ItemNumber.HasValue)
+			{
+				return ItemNumber.Value.ToString(numberFormat) + " " + ToString();
+			}
+
+			return ToString();
+		}
+
+		public override String ToString()
+		{
+			return
+				(_completed ? "x " : String.Empty)
+				+ (_completed && CompletedDate.HasValue ? (CompletedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
+				+ (!String.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : String.Empty)
+				+ (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
+				+ Body;
+		}
+
+		public void InvokePropertyChanged(PropertyChangedEventArgs e)
+		{
+			PropertyChangedEventHandler handler = PropertyChanged;
+			if (handler != null)
+			{
+				handler(this, e);
+			}
+		}
+	}
 }

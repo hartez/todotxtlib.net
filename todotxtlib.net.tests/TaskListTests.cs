@@ -245,5 +245,37 @@ namespace todotxtlib.net.tests
 			// should give us an empty list
 			Assert.AreEqual(0, notFooTaskList.Search("foo").Count);
 		}
+
+		[Test]
+		public void ObservableChanges()
+		{
+			var tl = new TaskList();
+
+			bool fired = false;
+
+			tl.CollectionChanged += (sender,e) =>
+			{
+				fired = true;
+			};
+
+			tl.LoadTasks(_testDataPath);
+
+			Assert.True(fired);
+			fired = false;
+
+			tl.Add(new Task("T", null, null, "Test task for observablecollection event firing"));
+
+			Assert.True(fired);
+			fired = false;
+
+			tl[0].PropertyChanged += (sender, e) =>
+			{
+				fired = true;
+			};
+
+			tl[0].Append("Test append for propertychanged event firing");
+
+			Assert.True(fired);
+		}
     }
 }
