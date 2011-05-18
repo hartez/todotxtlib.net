@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
 using NUnit.Framework;
 
 namespace todotxtlib.net.tests
@@ -163,9 +165,57 @@ namespace todotxtlib.net.tests
 
         #endregion
 
-        #region ToString
-        
-        [Test]
+		#region INotifyPropertyChanged Tests
+
+		[Test]
+		public void PropertyChanges()
+		{
+			var task = new Task("A", new List<string> {"+fixsink", "+writenovel"},
+			                    new List<string> {"@home", "@work"},
+			                    "Write a chapter about fixing the sink");
+
+			task.DueDate = DateTime.Now.AddDays(3).ToString();
+
+			bool fired = false;
+
+			List<String> changedProperties = new List<string>();
+
+			task.PropertyChanged += (sender, e) =>
+				{
+					fired = true;
+					changedProperties.Add(e.PropertyName);
+				};
+
+			// Setting task values to their current value shouldn't fire PropertyChanged
+			task.Priority = task.Priority;
+			task.DueDate = task.DueDate;
+			task.Body = task.Body;
+
+			Debug.WriteLine(changedProperties.Aggregate(String.Empty, (l, v) => l + " " + v));
+
+			Assert.False(fired);
+
+			// Setting them to new values should fire PropertyChanged
+			task.Priority = "B";
+			Debug.WriteLine(changedProperties.Aggregate(String.Empty, (l, v) => l + " " + v));
+			Assert.True(fired);
+			fired = false;
+
+			task.DueDate = DateTime.Now.AddDays(4).ToString();
+			Debug.WriteLine(changedProperties.Aggregate(String.Empty, (l, v) => l + " " + v));
+			Assert.True(fired);
+			fired = false;
+
+			task.Body = "Delete chapter about the sink";
+			Debug.WriteLine(changedProperties.Aggregate(String.Empty, (l, v) => l + " " + v));
+			Assert.True(fired);
+		}
+
+    	#endregion
+
+		#region ToString
+
+		[Test]
         public void ToString_From_Raw()
         {
             var task = new Task("(A) @work +test This is a test task");

@@ -78,10 +78,16 @@ namespace todotxtlib.net
 		public String Body
 		{
 			get { return _body; }
-			private set
+			set
 			{
+				if(_body == value)
+				{
+					return;
+				}
+
 				_body = value;
 				InvokePropertyChanged(new PropertyChangedEventArgs("Body"));
+				ParseFields(Body);
 			}
 		}
 
@@ -90,6 +96,11 @@ namespace todotxtlib.net
 			get { return _completedDate; }
 			private set
 			{
+				if(_completedDate == value)
+				{
+					return;
+				}
+
 				_completedDate = value;
 				InvokePropertyChanged(new PropertyChangedEventArgs("CompletedDate"));
 			}
@@ -100,6 +111,11 @@ namespace todotxtlib.net
 			get { return _createdDate; }
 			private set
 			{
+				if(_createdDate == value)
+				{
+					return;
+				}
+
 				_createdDate = value;
 				InvokePropertyChanged(new PropertyChangedEventArgs("CreatedDate"));
 			}
@@ -135,7 +151,14 @@ namespace todotxtlib.net
 			get { return _priority; }
 			set
 			{
-				_priority = value.ToUpperInvariant();
+				if(_priority == value 
+					|| (value == null && String.IsNullOrEmpty(_priority)))
+				{
+					return;
+				}
+
+				_priority = value != null ? value.ToUpperInvariant() : String.Empty;
+
 				InvokePropertyChanged(new PropertyChangedEventArgs("Priority"));
 			}
 		}
@@ -143,7 +166,7 @@ namespace todotxtlib.net
 		public string Raw
 		{
 			get { return _raw; }
-			set
+			private set
 			{
 				_raw = value;
 				InvokePropertyChanged(new PropertyChangedEventArgs("Raw"));
@@ -165,6 +188,11 @@ namespace todotxtlib.net
 			{
 				if (_metadata.ContainsKey("due"))
 				{
+					if(_metadata["due"] == value)
+					{
+						return;
+					}
+
 					_metadata["due"] = value;
 				}
 				else
