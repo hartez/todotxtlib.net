@@ -38,6 +38,32 @@ namespace todotxtlib.net.tests
 			}
 		}
 
+		[Test]
+		public void Save_To_Stream()
+		{
+			string tempTaskFile = CreateTempTasksFile();
+			
+			var tl = new TaskList();
+
+			using (var fs = File.OpenRead(tempTaskFile))
+			{
+				tl.LoadTasks(fs);
+			}
+
+			tl.Add(new Task("This task should end up in both lists"));		
+
+			string tempTaskFileCopy = CreateTempTasksFile();
+
+			using (var fs = File.OpenWrite(tempTaskFileCopy))
+			{
+				tl.SaveTasks(fs);
+			}
+
+			var tl2 = new TaskList(tempTaskFileCopy);
+
+			Assert.AreEqual(tl.Count, tl2.Count);
+		}
+
     	[Test]
         public void Add_ToCollection()
         {

@@ -220,7 +220,7 @@ namespace todotxtlib.net
 			}
 			catch (IOException ex)
 			{
-				throw new TaskException("There was a problem trying to read from your todo.txt file", ex);
+				throw new TaskException("There was a problem trying to read from your file", ex);
 			}
 		}
 
@@ -239,7 +239,26 @@ namespace todotxtlib.net
 			}
 			catch (IOException ex)
 			{
-				throw new TaskException("There was a problem trying to read from your todo.txt file", ex);
+				throw new TaskException("There was a problem trying to read from your file", ex);
+			}
+		}
+
+		public void SaveTasks(FileStream fileStream)
+		{
+			try
+			{
+				using (var sw = new StreamWriter(fileStream))
+				{
+					foreach (var item in Items)
+					{
+						sw.WriteLine(item.ToString());
+					}
+				}
+
+			}
+			catch (IOException ex)
+			{
+				throw new TaskException("There was a problem trying to save your file", ex);
 			}
 		}
 
@@ -251,7 +270,7 @@ namespace todotxtlib.net
 			}
 			catch (IOException ex)
 			{
-				throw new TaskException("There was a problem trying to save your todo.txt file", ex);
+				throw new TaskException("There was a problem trying to save your file", ex);
 			}
 		}
 
