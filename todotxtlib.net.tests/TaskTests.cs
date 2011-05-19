@@ -213,7 +213,20 @@ namespace todotxtlib.net.tests
 
     	#endregion
 
-		#region ToString
+		[Test]
+		public void BodyOnly()
+		{
+			var task = new Task("test");
+
+			Assert.IsNotEmpty(task.Body, "Body is empty");
+			Assert.AreEqual("test", task.Body);
+
+			task.Body = "test2";
+			Assert.IsNotEmpty(task.Body, "Body is empty");
+			Assert.AreEqual("test2", task.Body);
+		}
+
+    	#region ToString
 
 		[Test]
         public void ToString_From_Raw()

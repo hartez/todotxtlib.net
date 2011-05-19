@@ -207,10 +207,26 @@ namespace todotxtlib.net
 		public bool Completed
 		{
 			get { return _completed; }
-			private set
+			set
 			{
+				if(_completed == value)
+				{
+					return;
+				}
+
 				_completed = value;
+
 				InvokePropertyChanged(new PropertyChangedEventArgs("Completed"));
+
+				if (!_completed && IsPriority)
+				{
+					Priority = String.Empty;
+				}
+
+				if (_completed)
+				{
+					CompletedDate = DateTime.Now;
+				}
 			}
 		}
 
@@ -227,17 +243,7 @@ namespace todotxtlib.net
 
 		public void ToggleCompleted()
 		{
-			_completed = !_completed;
-
-			if (!_completed && IsPriority)
-			{
-				Priority = String.Empty;
-			}
-
-			if (_completed)
-			{
-				CompletedDate = DateTime.Now;
-			}
+			Completed = !Completed;
 		}
 
 		public void Empty()
