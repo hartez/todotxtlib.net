@@ -253,6 +253,8 @@ namespace todotxtlib.net
 					{
 						sw.WriteLine(item.ToString());
 					}
+
+					sw.Flush();
 				}
 
 			}

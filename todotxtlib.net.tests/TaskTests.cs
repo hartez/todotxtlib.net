@@ -103,6 +103,14 @@ namespace todotxtlib.net.tests
             AssertEquivalence(expectedTask, task);
         }
 
+		[Test]
+		public void Create_Project_In_Body()
+		{
+			var task = new Task("Oh (A) This is a test task @work +test ");
+
+			Assert.True(task.Projects.Contains("+test"));
+		}
+
         [Test]
         public void Create_Priority_Context_Project_Body()
         {
