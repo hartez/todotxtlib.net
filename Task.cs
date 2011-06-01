@@ -80,7 +80,7 @@ namespace todotxtlib.net
 			get { return _body; }
 			set
 			{
-				if(_body == value)
+				if (_body == value)
 				{
 					return;
 				}
@@ -96,7 +96,7 @@ namespace todotxtlib.net
 			get { return _completedDate; }
 			private set
 			{
-				if(_completedDate == value)
+				if (_completedDate == value)
 				{
 					return;
 				}
@@ -111,7 +111,7 @@ namespace todotxtlib.net
 			get { return _createdDate; }
 			private set
 			{
-				if(_createdDate == value)
+				if (_createdDate == value)
 				{
 					return;
 				}
@@ -151,8 +151,8 @@ namespace todotxtlib.net
 			get { return _priority; }
 			set
 			{
-				if(_priority == value 
-					|| (value == null && String.IsNullOrEmpty(_priority)))
+				if (_priority == value
+				    || (value == null && String.IsNullOrEmpty(_priority)))
 				{
 					return;
 				}
@@ -188,7 +188,7 @@ namespace todotxtlib.net
 			{
 				if (_metadata.ContainsKey("due"))
 				{
-					if(_metadata["due"] == value)
+					if (_metadata["due"] == value)
 					{
 						return;
 					}
@@ -209,7 +209,7 @@ namespace todotxtlib.net
 			get { return _completed; }
 			set
 			{
-				if(_completed == value)
+				if (_completed == value)
 				{
 					return;
 				}

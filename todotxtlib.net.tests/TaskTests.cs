@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -252,7 +253,22 @@ namespace todotxtlib.net.tests
 
         #endregion
 
-        static void AssertEquivalence(Task t1, Task t2)
+		[Test]
+		public void Equality()
+		{
+			var rawString = "This is a task @online @home +project +anotherproject";
+			Task a = new Task(rawString);
+			Task b = new Task(rawString);
+			Task c = new Task("This is different task @home +anotherproject");
+
+			IEqualityComparer<Task> comparer = new TaskEqualityComparer();
+
+			Assert.IsTrue(comparer.Equals(a, b));
+			Assert.IsFalse(comparer.Equals(b, c));
+			Assert.IsFalse(comparer.Equals(a, c));
+		}
+
+    	static void AssertEquivalence(Task t1, Task t2)
         {
             Assert.AreEqual(t1.Priority, t2.Priority);
             CollectionAssert.AreEquivalent(t1.Projects, t2.Projects);
