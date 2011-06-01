@@ -47,6 +47,9 @@
     <Compile Include="..\Task.cs">
       <Link>Task.cs</Link>
     </Compile>
+    <Compile Include="..\TaskEqualityComparer.cs">
+      <Link>TaskEqualityComparer.cs</Link>
+    </Compile>
     <Compile Include="..\TaskException.cs">
       <Link>TaskException.cs</Link>
     </Compile>
