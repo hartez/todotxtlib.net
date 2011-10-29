@@ -325,7 +325,7 @@ namespace todotxtlib.net
 
 				if (everythingElse.Groups["todo"].Success)
 				{
-					Body = everythingElse.Groups["todo"].Value;
+					_body = everythingElse.Groups["todo"].Value;
 				}
 
 				if (everythingElse.Groups["done"].Success)

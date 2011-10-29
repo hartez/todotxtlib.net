@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -155,6 +156,26 @@ namespace todotxtlib.net.tests
 		{
 			var tl = new TaskList(_testDataPath);
 			IEnumerable<Task> tasks = tl.AsEnumerable();
+		}
+
+		[Test]
+		public void Load_From_Stream_Repeated()
+		{
+			var s = new Stopwatch();
+
+			s.Start();
+			for (int n = 0; n < 500; n++)
+			{
+				using (FileStream fs = File.OpenRead(_testDataPath))
+				{
+					var tl = new TaskList();
+
+					tl.LoadTasks(fs);
+				}
+			}
+			s.Stop();
+
+			Debug.WriteLine(s.Elapsed);
 		}
 
 		[Test]
