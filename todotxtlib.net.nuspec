@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>todotxtlib.net</id>
+    <version>1.0.0</version>
+    <title>todotxtlib.net</title>
+    <authors>E.Z. Hart</authors>
+    <owners>E.Z. Hart</owners>
+    <licenseUrl>https://github.com/hartez/todotxtlib.net/blob/master/license.txt</licenseUrl>
+    <projectUrl>https://github.com/hartez/todotxtlib.net</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>.NET library for parsing the todo.txt file format</description>
+    <copyright>Copyright 2012</copyright>
+    <tags>.NET WP7 3.5 todo.txt</tags>
+  </metadata>
+  <files>
+	<file src="todotxtlib.net.3.5\bin\Release\todotxtlib.net.dll" target="lib\net35" />
+	<file src="Todotxtlib.WindowsPhone\bin\Release\todotxtlib.net.dll" target="lib\sl3-wp" />
+	<file src="Todotxtlib.WindowsPhone.7.1\bin\Release\todotxtlib.net.dll" target="lib\sl4-windowsphone71" />
+  </files>
+</package>

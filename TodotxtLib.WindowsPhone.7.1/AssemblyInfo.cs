@@ -1,17 +1,16 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Resources;
+using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TodotxtLib.WindowsPhone._7._1")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("todotxtlib.net")]
+[assembly: AssemblyDescription("todotxtlib.net for Windows Phone 7.1 (Mango)")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("TodotxtLib.WindowsPhone._7._1")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2011")]
+[assembly: AssemblyCompany("E.Z. Hart")]
+[assembly: AssemblyProduct("todotxtlib.net")]
+[assembly: AssemblyCopyright("Copyright © E.Z. Hart 2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -21,7 +20,7 @@ using System.Resources;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("b1727588-a33c-4f73-9a5f-27abd45ecfaa")]
+[assembly: Guid("baa21eef-d8f4-4511-b9ec-6f27f2d22a93")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -30,8 +29,6 @@ using System.Resources;
 //      Build Number
 //      Revision
 //
-// You can specify all the values or you can default the Revision and Build Numbers 
-// by using the '*' as shown below:
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: NeutralResourcesLanguageAttribute("en-US")]
+[assembly: NeutralResourcesLanguage("en-US")]
