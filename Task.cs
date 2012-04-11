@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -295,10 +296,35 @@ namespace todotxtlib.net
 			{
 				String data = match.Groups[1].Captures[0].Value;
 				string[] kvp = data.Split(':');
-				_metadata.Add(kvp[0], kvp[1]);
+
+				AddToMetadata(kvp[0], kvp[1]);
 			}
 
+			RecognizePhoneNumbers(todo);
+
 			InvokePropertyChanged(new PropertyChangedEventArgs("Metadata"));
+		}
+
+		private void AddToMetadata(string key, string value)
+		{
+			if (_metadata.Keys.Contains(key))
+			{
+				key = key + _metadata.Keys.Count(k => k == key).ToString(CultureInfo.InvariantCulture);
+			}
+
+			_metadata.Add(key, value);
+		}
+
+		private void RecognizePhoneNumbers(string todo)
+		{
+			var phoneRegex = new Regex(@"(?<!phone:)(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?");
+
+			MatchCollection phoneNumbers = phoneRegex.Matches(todo);
+
+			foreach (Match match in phoneNumbers)
+			{
+				AddToMetadata("phone", match.Value);
+			}
 		}
 
 		private void ParseEverythingElse(String todo)

@@ -277,5 +277,57 @@ namespace todotxtlib.net.tests
             Assert.AreEqual(t1.Completed, t2.Completed);
             Assert.AreEqual(t1.Body, t2.Body);
         }
+
+		[Test]
+		public void RecognizePhoneNumber()
+		{
+			var task = new Task("This task contains the phone number 720-564-1231");
+
+			Assert.That(task.Metadata["phone"] == "720-564-1231"); 
+		}
+
+		[Test]
+		public void ExplicitPhoneNumber()
+		{
+			var task = new Task("This task contains an explicit phone number phone:720-564-1231");
+
+			Assert.That(task.Metadata["phone"] == "720-564-1231"); 
+		}
+
+		[Test]
+		public void MultipleRecognizePhoneNumber()
+		{
+			var task = new Task("This task contains the phone number (720) 564-1231 and the number (317)228-1231");
+
+			Assert.That(task.Metadata.ContainsKey("phone"), "Metadata should have key 'phone'");
+			Assert.That(task.Metadata.ContainsKey("phone1"), "Metadata should have key 'phone1'");
+
+			Assert.That(task.Metadata["phone"] == "(720) 564-1231", "'phone' should be (720) 564-1231");
+			Assert.That(task.Metadata["phone1"] == "(317)228-1231", "'phone1' should be (317)228-1231");
+		}
+
+		[Test]
+		public void MultipleExplicitPhoneNumber()
+		{
+			var task = new Task("This task contains an explicit phone:720-564-1231 and another phone:317.228.1231");
+
+			Assert.That(task.Metadata["phone"] == "720-564-1231", "'phone' should have been 720-564-1231");
+			Assert.That(task.Metadata["phone1"] == "317.228.1231", "'phone1' should have been 317.228.1231");
+		}
+
+		[Test]
+		public void MultipleMixedPhoneNumber()
+		{
+			var task = new Task("This task contains an explicit phone:720-564-1231 and another 317-228-1231");
+
+			Assert.That(task.Metadata["phone"] == "720-564-1231");
+			Assert.That(task.Metadata["phone1"] == "317-228-1231");
+
+			// Different order; explicit metadata should still be first
+			task = new Task("This task contains a number 720-564-1231 and another phone:317-228-1231 ");
+
+			Assert.That(task.Metadata["phone"] == "317-228-1231");
+			Assert.That(task.Metadata["phone1"] == "720-564-1231");
+		}
     }
 }
