@@ -13,3 +13,4 @@ todotxtlib.net.csproj.user
 TodotxtLib.WindowsPhone/TodotxtLib.WindowsPhone.csproj.user
 todotxtlib.net.3.5/bin/*
 todotxtlib.net.3.5/obj/*
+*.nupkg
