@@ -7,8 +7,10 @@ packages/*
 *.testsettings
 packages.config
 *.vsmdi
-TodotxtLib.WindowsPhone/Bin/*
+TodotxtLib.WindowsPhone/bin/*
 TodotxtLib.WindowsPhone/obj/*
+TodotxtLib.WindowsPhone.7.1/bin/*
+TodotxtLib.WindowsPhone.7.1/obj/*
 todotxtlib.net.csproj.user
 TodotxtLib.WindowsPhone/TodotxtLib.WindowsPhone.csproj.user
 todotxtlib.net.3.5/bin/*
