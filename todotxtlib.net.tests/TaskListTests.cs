@@ -85,7 +85,25 @@ namespace todotxtlib.net.tests
 			File.Delete(tempTaskFile);
 		}
 
-		[Test]
+        [Test]
+        public void BlankLinesAreNotTasks()
+        {
+            // Create a copy of test data so we can leave the original alone
+            string tempTaskFile = CreateTempTasksFile();
+
+            var tl = new TaskList(tempTaskFile);
+            var originalCount = tl.Count;
+
+            var newFileContents = new List<string> {"", "The above line was blank"};
+
+            File.AppendAllLines(tempTaskFile, newFileContents);
+
+            tl = new TaskList(tempTaskFile);
+
+            Assert.That(tl.Count == originalCount + 1, "Added two lines, one of which was blank; should have only one more task");
+        }
+
+	    [Test]
 		public void Add_To_Empty_File()
 		{
 			// v0.3 and earlier contained a bug where a blank task was added

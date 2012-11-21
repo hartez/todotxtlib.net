@@ -234,7 +234,10 @@ namespace todotxtlib.net
 
 				foreach (string line in lines)
 				{
-					Add(new Task(line));
+                    if (!String.IsNullOrEmpty(line.Trim()))
+                    {
+                        Add(new Task(line));
+                    }
 				}
 			}
 			catch (IOException ex)
