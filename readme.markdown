@@ -3,7 +3,7 @@ todotxtlib.net
 
 A simple .NET library for working with todo.txt files
 
-The goal of this project is to provide a simple .NET library for working with tasks stored in the [todo.txt](http://todotxt.com/) format. 
+The goal of this project is to provide a simple .NET library for working with tasks stored in the [todo.txt](https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format) format. 
 
 Sub-goals include:
 
