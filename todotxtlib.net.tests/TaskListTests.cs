@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -86,7 +87,7 @@ namespace todotxtlib.net.tests
 		}
 
         [Test]
-        public void BlankLinesAreNotTasks()
+        public void BlankLinesAreEmptyTasks()
         {
             // Create a copy of test data so we can leave the original alone
             string tempTaskFile = CreateTempTasksFile();
@@ -94,13 +95,15 @@ namespace todotxtlib.net.tests
             var tl = new TaskList(tempTaskFile);
             var originalCount = tl.Count;
 
-            var newFileContents = new List<string> {"", "The above line was blank"};
+            File.AppendAllText(tempTaskFile, Environment.NewLine + Environment.NewLine + "The above line was blank" + Environment.NewLine);
 
-            File.AppendAllLines(tempTaskFile, newFileContents);
+            var st = File.Open(tempTaskFile, FileMode.Open);
 
-            tl = new TaskList(tempTaskFile);
+            st.Close();
 
-            Assert.That(tl.Count == originalCount + 1, "Added two lines, one of which was blank; should have only one more task");
+            var tl2 = new TaskList(tempTaskFile);
+
+            Assert.AreEqual(originalCount + 2, tl2.Count, "Added two lines, one of which was blank (empty)");
         }
 
 	    [Test]

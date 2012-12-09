@@ -234,10 +234,7 @@ namespace todotxtlib.net
 
 				foreach (string line in lines)
 				{
-                    if (!String.IsNullOrEmpty(line.Trim()))
-                    {
-                        Add(new Task(line));
-                    }
+				    Add(new Task(line));
 				}
 			}
 			catch (IOException ex)
@@ -310,6 +307,9 @@ namespace todotxtlib.net
 			}
 		}
 
+
+        // WriteAllLines and ReadAllLines are included here to support Windows Phone
+        // They're available by default in other versions of the .NET framework
 		public static void WriteAllLines(string path, string[] lines)
 		{
 			using (var fs = File.Open(path, FileMode.Create, FileAccess.Write))
@@ -334,12 +334,10 @@ namespace todotxtlib.net
 			{
 				using (var sr = new StreamReader(fs))
 				{
-					string line = sr.ReadLine();
-					while (!String.IsNullOrEmpty(line))
-					{
-						lines.Add(line);
-						line = sr.ReadLine();
-					}
+                    while(!sr.EndOfStream)
+                    {
+                        lines.Add(sr.ReadLine());
+                    }
 				}
 			}
 			return lines.ToArray();
