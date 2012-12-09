@@ -205,12 +205,10 @@ namespace todotxtlib.net
 
 				using(var sr = new StreamReader(fileStream))
 				{
-					var line = sr.ReadLine();
-					while(!String.IsNullOrEmpty(line))
-					{
-						lines.Add(line);
-						line = sr.ReadLine();
-					}
+                    while (!sr.EndOfStream)
+                    {
+                        lines.Add(sr.ReadLine());
+                    }
 				}
 
 				foreach (string line in lines)
