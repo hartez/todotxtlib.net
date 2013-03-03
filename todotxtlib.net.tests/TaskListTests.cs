@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace todotxtlib.net.tests
 {
-	[TestFixture]
+    [TestFixture]
 	internal class TaskListTests
 	{
 		private string _testDataPath = "testtasks.txt";
@@ -172,12 +172,12 @@ namespace todotxtlib.net.tests
 			}
 		}
 
-		[Test]
-		public void Load_From_File()
-		{
-			var tl = new TaskList(_testDataPath);
-			IEnumerable<Task> tasks = tl.AsEnumerable();
-		}
+        [Test]
+        public void Load_From_File()
+        {
+            var tl = new TaskList(_testDataPath);
+            IEnumerable<Task> tasks = tl.AsEnumerable();
+        }
 
 		[Test]
 		public void Load_From_Stream_Repeated()
@@ -348,5 +348,21 @@ namespace todotxtlib.net.tests
 			Task newTask = tl.Last();
 			Assert.IsTrue(newTask.Completed);
 		}
+
+        [Test]
+        public void LoadTasksFromString()
+        {
+            var text = @"
+this is the first task
+this is the second task
+
+the previous line was blank";
+
+            var tl = new TaskList();
+            tl.LoadTasksFromString(text);
+
+            Assert.That(tl.Count == 5);
+            Assert.That(tl.Search("previous").Any());
+        }
 	}
 }

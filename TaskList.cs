@@ -8,8 +8,23 @@ namespace todotxtlib.net
 {
 	public class TaskList : ObservableCollection<Task>
 	{
-		private String _numberFormat;
+	    public static TaskList Merge(TaskList original, TaskList new1, TaskList new2)
+	    {
+            var diff = new DiffMatchPatch.diff_match_patch();
+            var diffs = diff.diff_main(original.ToString(), new1.ToString());
 
+            var patches = diff.patch_make(original.ToString(), diffs);
+
+            var text = diff.patch_apply(patches, new2.ToString());
+
+	        var result = new TaskList();
+            result.LoadTasksFromString((String)text[0]);
+
+            return result;
+	    }
+
+	    private String _numberFormat;
+        
 		public TaskList()
 		{
 		}
@@ -27,6 +42,11 @@ namespace todotxtlib.net
 				Add(todo);
 			}
 		}
+
+        public override string ToString()
+        {
+            return this.Aggregate(String.Empty, (s, task) => s + (s.Length == 0 ? String.Empty : Environment.NewLine) + task.ToString());
+        }
 
 		public IEnumerable<String> ToOutput()
 		{
@@ -195,7 +215,20 @@ namespace todotxtlib.net
 			}
 		}
 
-		public void LoadTasks(Stream fileStream)
+	    public void LoadTasksFromString(String text)
+	    {
+	        using(var sr = new StringReader(text))
+	        {
+	            var line = sr.ReadLine();
+	            while(line != null)
+	            {
+                    Add(new Task(line));
+                    line = sr.ReadLine();
+	            }
+	        }
+	    }
+
+	    public void LoadTasks(Stream fileStream)
 		{
 			try
 			{
@@ -304,7 +337,6 @@ namespace todotxtlib.net
 				throw new TaskException("An error occurred while trying to update your task int the task list file", ex);
 			}
 		}
-
 
         // WriteAllLines and ReadAllLines are included here to support Windows Phone
         // They're available by default in other versions of the .NET framework

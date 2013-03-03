@@ -1,0 +1,9 @@
+﻿(A) Call Mom @Phone +Family
+(D) Schedule annual checkup +Health
+(B) Outline chapter 5 +Novel @Computer
+(C) Add cover sheets @Office +TPSReports
+Plan backyard herb/vegetable garden @Home
+Pick up milk @GroceryStore
+Research self-publishing services +Novel @Computer
+Download Todo.txt mobile app @Phone
+Return videos

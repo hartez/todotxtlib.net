@@ -1,0 +1,8 @@
+﻿(A) Call Mom @Phone +Family
+(A) Schedule annual checkup +Health
+(B) Outline chapter 5 +Novel @Computer
+(C) Add cover sheets @Office +TPSReports
+Plant backyard herb garden @Home
+Research self-publishing services +Novel @Computer
+x Download Todo.txt mobile app @Phone
+Rent Star Trek II
