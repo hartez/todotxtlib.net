@@ -51,6 +51,9 @@
     <Reference Include="mscorlib.extensions" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\DiffMatchPatch\DiffMatchPatch.cs">
+      <Link>DiffMatchPatch\DiffMatchPatch.cs</Link>
+    </Compile>
     <Compile Include="..\StringExtensions.cs">
       <Link>StringExtensions.cs</Link>
     </Compile>
@@ -67,9 +70,15 @@
       <Link>TaskList.cs</Link>
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="HttpUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\DiffMatchPatch\COPYING">
+      <Link>DiffMatchPatch\COPYING</Link>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />

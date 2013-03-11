@@ -50,6 +50,9 @@
     <Reference Include="System.Net" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\DiffMatchPatch\DiffMatchPatch.cs">
+      <Link>DiffMatchPatch\DiffMatchPatch.cs</Link>
+    </Compile>
     <Compile Include="..\StringExtensions.cs">
       <Link>StringExtensions.cs</Link>
     </Compile>
@@ -65,7 +68,13 @@
     <Compile Include="..\TaskList.cs">
       <Link>TaskList.cs</Link>
     </Compile>
+    <Compile Include="HttpUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\DiffMatchPatch\COPYING">
+      <Link>DiffMatchPatch\COPYING</Link>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />

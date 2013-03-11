@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("E.Z. Hart")]
 [assembly: AssemblyProduct("todotxtlib.net")]
-[assembly: AssemblyCopyright("Copyright © E.Z. Hart 2012")]
+[assembly: AssemblyCopyright("Copyright © E.Z. Hart 2012-2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -29,6 +29,6 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.2.4.0")]
+[assembly: AssemblyFileVersion("1.2.4.0")]
 [assembly: NeutralResourcesLanguage("en-US")]
