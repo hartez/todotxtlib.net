@@ -329,5 +329,41 @@ namespace todotxtlib.net.tests
 			Assert.That(task.Metadata["phone"] == "317-228-1231");
 			Assert.That(task.Metadata["phone1"] == "720-564-1231");
 		}
+
+        [Test(Description = "A project or context contains any non-whitespace character and must end in an alphanumeric or ‘_’. ")]
+        public void ShouldAllowProjectWithHyphen()
+        {
+            var task = new Task("This task contains a project with a hypen +hyphen-project @home");
+
+            Assert.That(task.Projects.Contains("+hyphen-project"));
+        }
+
+        [Test(Description = "A project or context contains any non-whitespace character and must end in an alphanumeric or ‘_’. ")]
+        public void ShouldAllowContextWithHyphen()
+        {
+            var task = new Task("This task contains a project with a hypen @hyphen-context @home");
+
+            Assert.That(task.Contexts.Contains("@hyphen-context"));
+        }
+
+        [Test(Description = "A project or context contains any non-whitespace character and must end in an alphanumeric or ‘_’. ")]
+        public void ProjectMustEndWithAlphanumericOrUnderscore()
+        {
+            var task = new Task("This task has only one project with a hyphen in it +hyphen-project +nohyphen-");
+
+            Assert.That(task.Projects.Contains("+hyphen-project"));
+            Assert.False(task.Projects.Contains("+nohyphen-"));
+            Assert.That(task.Projects.Contains("+nohyphen"));
+        }
+
+        [Test(Description = "A project or context contains any non-whitespace character and must end in an alphanumeric or ‘_’. ")]
+        public void ContextMustEndWithAlphanumericOrUnderscore()
+        {
+            var task = new Task("This task has only one valid context @hyphen-context @nohyphen-");
+
+            Assert.That(task.Contexts.Contains("@hyphen-context"));
+            Assert.False(task.Contexts.Contains("@nohyphen-"));
+            Assert.That(task.Contexts.Contains("@nohyphen"));
+        }
     }
 }

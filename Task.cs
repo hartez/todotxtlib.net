@@ -260,7 +260,7 @@ namespace todotxtlib.net
 		{
 			_projects.Clear();
 
-			MatchCollection projects = Regex.Matches(todo, @"\s(\+\w+)");
+            MatchCollection projects = Regex.Matches(todo, @"\s(\+\S*\w)");
 
 			foreach (Match match in projects)
 			{
@@ -275,7 +275,7 @@ namespace todotxtlib.net
 		{
 			_contexts.Clear();
 
-			MatchCollection contexts = Regex.Matches(todo, @"\s(@\w+)");
+            MatchCollection contexts = Regex.Matches(todo, @"\s(@\S*\w)");
 
 			foreach (Match match in contexts)
 			{
