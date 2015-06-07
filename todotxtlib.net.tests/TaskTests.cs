@@ -365,5 +365,28 @@ namespace todotxtlib.net.tests
             Assert.False(task.Contexts.Contains("@nohyphen-"));
             Assert.That(task.Contexts.Contains("@nohyphen"));
         }
+
+        [Test]
+        public void MetaDataMustNotHaveWhitespaceAfterColon()
+        {
+            var task =
+                new Task(
+                    "due:2014-07-02 Get back to work on project x Ansel 453.456.8967  Jim 432.453.9134  Bob's cell: 812.477.7272");
+
+            Assert.That(task.DueDate == "2014-07-02");
+            Assert.False(task.Metadata.ContainsKey("cell"), "metadata cannot have whitespace");
+        }
+
+        [Test]
+        public void MultiplePhoneNumbersShouldNotConflict()
+        {
+            var task =
+                new Task(
+                    "due:2014-07-02 Get back to work on project x Ansel 453.456.8967  Jim 432.453.9134  Bob's cell: 812.477.7272");
+
+            Assert.That(task.Metadata["phone"] == "453.456.8967");
+            Assert.That(task.Metadata["phone1"] == "432.453.9134");
+            Assert.That(task.Metadata["phone2"] == "812.477.7272");
+        }
     }
 }

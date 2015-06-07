@@ -290,7 +290,7 @@ namespace todotxtlib.net
 		{
 			_metadata.Clear();
 
-			MatchCollection metadata = Regex.Matches(todo, @"\s(?<meta>\w+:.\S*)");
+            MatchCollection metadata = Regex.Matches(todo, @"(?:^|\s)(?<meta>\w+:[^\s]+\S*)");
 
 			foreach (Match match in metadata)
 			{
@@ -309,7 +309,9 @@ namespace todotxtlib.net
 		{
 			if (_metadata.Keys.Contains(key))
 			{
-				key = key + _metadata.Keys.Count(k => k == key).ToString(CultureInfo.InvariantCulture);
+			    var previous = _metadata.Keys.Count(currentKey => Regex.IsMatch(currentKey, "^" + key + "[0-9]*$", RegexOptions.CultureInvariant));
+
+				key = key + previous;
 			}
 
 			_metadata.Add(key, value);
