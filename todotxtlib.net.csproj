@@ -45,7 +45,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DiffMatchPatch\COPYING" />
-    <None Include="packages.config" />
     <None Include="readme.markdown" />
   </ItemGroup>
   <ItemGroup>
