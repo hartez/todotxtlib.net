@@ -13,14 +13,10 @@ namespace todotxtlib.net
 		{
 			var diff = new DiffMatchPatch.diff_match_patch();
 			var diffs = diff.diff_main(original.ToString(), new1.ToString());
-
 			var patches = diff.patch_make(original.ToString(), diffs);
-
 			var text = diff.patch_apply(patches, new2.ToString());
-
 			var result = new TaskList();
 			result.LoadTasksFromString(text[0] as string);
-
 			return result;
 		}
 
@@ -47,12 +43,12 @@ namespace todotxtlib.net
 			return this.Aggregate(String.Empty, (s, task) => s + (s.Length == 0 ? String.Empty : Environment.NewLine) + task.ToString());
 		}
 
-		public IEnumerable<String> ToOutput()
+		public IEnumerable<string> ToOutput()
 		{
 			return this.Select(x => x.ToString());
 		}
 
-		public IEnumerable<String> ToNumberedOutput()
+		public IEnumerable<string> ToNumberedOutput()
 		{
 			if (String.IsNullOrEmpty(_numberFormat))
 				_numberFormat = new String('0', Count.ToString().Length);
@@ -84,33 +80,35 @@ namespace todotxtlib.net
 				: this.Where(todo => todo.Priority == priority).OrderBy(todo => todo.Priority), Count);
 		}
 
+		private readonly Func<TaskList, int, Task> _getTarget = (taskList, item) => taskList.FirstOrDefault(todo => todo.ItemNumber == item);
+
 		public void SetItemPriority(int item, string priority)
 		{
-			var target = this.FirstOrDefault(todo => todo.ItemNumber == item);
+			var target = _getTarget(this, item);
 			if (target != null) target.Priority = priority;
 		}
 
 		private bool ReplaceItemText(int item, string oldText, string newText)
 		{
-			var target = this.FirstOrDefault(todo => todo.ItemNumber == item);
+			var target = _getTarget(this, item);
 			return target != null && target.ReplaceItemText(oldText, newText);
 		}
 
 		public void ReplaceInTask(int item, string newText)
 		{
-			var target = this.FirstOrDefault(todo => todo.ItemNumber == item);
+			var target = _getTarget(this, item);
 			if (target != null) target.Replace(newText);
 		}
 
 		public void AppendToTask(int item, string newText)
 		{
-			var target = this.FirstOrDefault(todo => todo.ItemNumber == item);
+			var target = _getTarget(this, item);
 			if (target != null) target.Append(newText);
 		}
 
 		public void PrependToTask(int item, string newText)
 		{
-			var target = this.FirstOrDefault(todo => todo.ItemNumber == item);
+			var target = _getTarget(this, item);
 			if (target != null) target.Prepend(newText);
 		}
 
@@ -122,7 +120,6 @@ namespace todotxtlib.net
 		public TaskList RemoveCompletedTasks(bool preserveLineNumbers)
 		{
 			var completed = ListCompleted();
-
 			for (var n = Count - 1; n >= 0; n--)
 			{
 				if (!this[n].Completed) continue;
@@ -131,29 +128,27 @@ namespace todotxtlib.net
 				else
 					Remove(this[n]);
 			}
-
 			return completed;
 		}
 
 		public void RemoveTask(int item, bool preserveLineNumbers)
 		{
-			var target = (from todo in this
-				      where todo.ItemNumber == item
-				      select todo).FirstOrDefault();
-
+			var target = _getTarget(this, item);
 			if (target == null) return;
-			if (preserveLineNumbers)
-				target.Empty();
+			if (preserveLineNumbers) target.Empty();
 			else
 			{
 				Remove(target);
 
-				var itemNumber = 1;
-				foreach (var todo in this)
-				{
-					todo.ItemNumber = itemNumber;
-					itemNumber++;
-				}
+				for (var i = 0; i < Count; i++)
+					this[i].ItemNumber = i + 1;
+
+				//var itemNumber = 1;
+				//foreach (var todo in this)
+				//{
+				//	todo.ItemNumber = itemNumber;
+				//	itemNumber++;
+				//}
 			}
 		}
 
@@ -174,7 +169,6 @@ namespace todotxtlib.net
 				Clear();
 
 				var lines = new List<string>();
-
 				using (var sr = new StreamReader(fileStream))
 				{
 					while (!sr.EndOfStream)
@@ -256,9 +250,7 @@ namespace todotxtlib.net
 		{
 			try
 			{
-				var currentIndex = IndexOf(this.First(t => t.Raw == currentTask.Raw));
-
-				this[currentIndex] = newTask;
+				this[IndexOf(this.First(t => t.Raw == currentTask.Raw))] = newTask;
 			}
 			catch (Exception ex)
 			{

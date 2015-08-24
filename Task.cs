@@ -12,14 +12,10 @@ namespace todotxtlib.net
 		private readonly Dictionary<string, string> _metadata = new Dictionary<string, string>();
 		private string _body;
 		private bool _completed;
-
 		private DateTime? _completedDate;
 		private List<string> _contexts = new List<string>();
-
 		private DateTime? _createdDate;
-
 		private int? _itemNumber;
-
 		private string _priority = String.Empty;
 		private List<string> _projects = new List<string>();
 		private string _raw;
@@ -33,23 +29,18 @@ namespace todotxtlib.net
 			ParseFields(raw);
 		}
 
-		public Task(string raw)
-			: this(raw, null)
-		{
-		}
+		public Task(string raw) : this(raw, null) { }
 
 		public Task(string priority, List<string> projects, List<string> contexts, string body)
-			: this(priority, projects, contexts, body, null, String.Empty, false, null)
-		{
-		}
+			: this(priority, projects, contexts, body, null, String.Empty, false, null) { }
 
 		public Task(string priority, List<string> projects, List<string> contexts,
 			    string body, DateTime? createdDate, string dueDate, bool completed, DateTime? completedDate)
 		{
 			Priority = priority.Replace("(", String.Empty).Replace(")", String.Empty).ToUpperInvariant();
 
-			if (projects != null) _projects = projects;
-			if (contexts != null) _contexts = contexts;
+			_projects = projects ?? new List<string>();
+			_contexts = contexts ?? new List<string>();
 
 			CreatedDate = createdDate;
 			DueDate = dueDate;
@@ -125,7 +116,7 @@ namespace todotxtlib.net
 
 		public IEnumerable<string> Contexts
 		{
-			get { return _contexts.Select(p => p); }
+			get { return _contexts.Select(c => c); }
 		}
 
 		public string Priority
@@ -211,8 +202,7 @@ namespace todotxtlib.net
 			_projects.Clear();
 
 			var projects = Regex.Matches(todo, @"\s(\+\S*\w)");
-			foreach (var project in from Match match in projects select match.Groups[1].Captures[0].Value)
-				_projects.Add(project);
+			_projects.AddRange(projects.Cast<Match>().Select(match => match.Groups[1].Captures[0].Value));
 
 			InvokePropertyChanged(new PropertyChangedEventArgs("Projects"));
 		}
@@ -222,8 +212,7 @@ namespace todotxtlib.net
 			_contexts.Clear();
 
 			var contexts = Regex.Matches(todo, @"\s(@\S*\w)");
-			foreach (var context in from Match match in contexts select match.Groups[1].Captures[0].Value)
-				_contexts.Add(context);
+			_contexts.AddRange(contexts.Cast<Match>().Select(match => match.Groups[1].Captures[0].Value));
 
 			InvokePropertyChanged(new PropertyChangedEventArgs("Contexts"));
 		}
@@ -233,8 +222,11 @@ namespace todotxtlib.net
 			_metadata.Clear();
 
 			var metadata = Regex.Matches(todo, @"(?:^|\s)(?<meta>\w+:[^\s]+\S*)");
-			foreach (var kvp in from Match match in metadata select match.Groups[1].Captures[0].Value into data select data.Split(':'))
-				AddToMetadata(kvp[0], kvp[1]);
+			foreach (var keyValuePair in from Match match in metadata
+						     select match.Groups[1].Captures[0].Value
+							     into data
+							     select data.Split(':'))
+				AddToMetadata(keyValuePair[0], keyValuePair[1]);
 
 			RecognizePhoneNumbers(todo);
 			InvokePropertyChanged(new PropertyChangedEventArgs("Metadata"));
@@ -333,8 +325,7 @@ namespace todotxtlib.net
 		public void InvokePropertyChanged(PropertyChangedEventArgs e)
 		{
 			var handler = PropertyChanged;
-			if (handler != null)
-				handler(this, e);
+			if (handler != null) handler(this, e);
 		}
 	}
 }

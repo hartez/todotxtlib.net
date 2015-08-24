@@ -8,7 +8,7 @@ namespace todotxtlib.net
 
 		public bool Equals(Task x, Task y)
 		{
-			return x.ToString() == y.ToString();
+			return x.ToString().Equals(y.ToString());
 		}
 
 		public int GetHashCode(Task obj)
