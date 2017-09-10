@@ -265,6 +265,27 @@ namespace todotxtlib.net
 			}
 		}
 
+		public void WriteTasks(Stream stream)
+		{
+			try
+			{
+				using (var sw = new StreamWriter(stream))
+				{
+					foreach (var item in Items)
+					{
+						sw.WriteLine(item.ToString());
+					}
+
+					sw.Flush();
+				}
+
+			}
+			catch (IOException ex)
+			{
+				throw new TaskException("There was a problem trying to write your tasks to the stream", ex);
+			}
+		}
+
 		public void SaveTasks(FileStream fileStream)
 		{
 			try

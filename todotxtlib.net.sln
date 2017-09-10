@@ -7,11 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "todotxtlib.net", "todotxtli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "todotxtlib.net.tests", "todotxtlib.net.tests\todotxtlib.net.tests.csproj", "{77FE6427-DC8F-41BE-B4FC-35B275B801F8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1DE56233-C732-4FE5-B416-11AF261516A9}"
-	ProjectSection(SolutionItems) = preProject
-		todotxtlib.net.nuspec = todotxtlib.net.nuspec
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "todotxtlib.net.standard", "todotxtlib.net.standard\todotxtlib.net.standard.csproj", "{A1D61CCD-4AA7-4A1A-A204-507E8ECB5592}"
 EndProject
 Global
