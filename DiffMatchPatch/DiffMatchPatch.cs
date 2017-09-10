@@ -24,7 +24,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+#if NETSTANDARD1_3
+using System.Net;
+#else
 using System.Web;
+#endif
 
 namespace DiffMatchPatch {
   internal static class CompatibilityExtensions {
@@ -170,8 +174,12 @@ namespace DiffMatchPatch {
             break;
         }
 
-        text.Append(HttpUtility.UrlEncode(aDiff.text,
+#if NETSTANDARD1_3
+	      text.Append(WebUtility.UrlEncode(aDiff.text).Replace('+', ' ')).Append("\n");
+#else
+				text.Append(HttpUtility.UrlEncode(aDiff.text,
             new UTF8Encoding()).Replace('+', ' ')).Append("\n");
+#endif
       }
 
       return diff_match_patch.unescapeForEncodeUriCompatability(
@@ -1432,9 +1440,13 @@ namespace DiffMatchPatch {
       foreach (Diff aDiff in diffs) {
         switch (aDiff.operation) {
           case Operation.INSERT:
-            text.Append("+").Append(HttpUtility.UrlEncode(aDiff.text,
+#if NETSTANDARD1_3
+	          text.Append("+").Append(WebUtility.UrlEncode(aDiff.text).Replace('+', ' ')).Append("\t");
+#else
+						text.Append("+").Append(HttpUtility.UrlEncode(aDiff.text,
                 new UTF8Encoding()).Replace('+', ' ')).Append("\t");
-            break;
+#endif
+						break;
           case Operation.DELETE:
             text.Append("-").Append(aDiff.text.Length).Append("\t");
             break;
@@ -1478,16 +1490,20 @@ namespace DiffMatchPatch {
             // decode would change all "+" to " "
             param = param.Replace("+", "%2b");
 
-            param = HttpUtility.UrlDecode(param, new UTF8Encoding(false, true));
-            //} catch (UnsupportedEncodingException e) {
-            //  // Not likely on modern system.
-            //  throw new Error("This system does not support UTF-8.", e);
-            //} catch (IllegalArgumentException e) {
-            //  // Malformed URI sequence.
-            //  throw new IllegalArgumentException(
-            //      "Illegal escape in diff_fromDelta: " + param, e);
-            //}
-            diffs.Add(new Diff(Operation.INSERT, param));
+#if NETSTANDARD1_3
+						param = WebUtility.UrlDecode(param);
+#else
+						param = HttpUtility.UrlDecode(param, new UTF8Encoding(false, true));
+#endif
+						//} catch (UnsupportedEncodingException e) {
+						//  // Not likely on modern system.
+						//  throw new Error("This system does not support UTF-8.", e);
+						//} catch (IllegalArgumentException e) {
+						//  // Malformed URI sequence.
+						//  throw new IllegalArgumentException(
+						//      "Illegal escape in diff_fromDelta: " + param, e);
+						//}
+						diffs.Add(new Diff(Operation.INSERT, param));
             break;
           case '-':
             // Fall through.
@@ -2253,7 +2269,11 @@ namespace DiffMatchPatch {
           }
           line = text[textPointer].Substring(1);
           line = line.Replace("+", "%2b");
-          line = HttpUtility.UrlDecode(line, new UTF8Encoding(false, true));
+#if NETSTANDARD1_3
+					line = WebUtility.UrlDecode(line);
+#else
+					line = HttpUtility.UrlDecode(line, new UTF8Encoding(false, true));
+#endif
           if (sign == '-') {
             // Deletion.
             patch.diffs.Add(new Diff(Operation.DELETE, line));

@@ -132,10 +132,7 @@ namespace todotxtlib.net
 			               where todo.ItemNumber == item
 			               select todo).FirstOrDefault();
 
-			if (target != null)
-			{
-				target.Replace(newText);
-			}
+			target?.Replace(newText);
 		}
 
 		public void AppendToTask(int item, string newText)
@@ -144,10 +141,7 @@ namespace todotxtlib.net
 			               where todo.ItemNumber == item
 			               select todo).FirstOrDefault();
 
-			if (target != null)
-			{
-				target.Append(newText);
-			}
+			target?.Append(newText);
 		}
 
 		public void PrependToTask(int item, string newText)
@@ -156,10 +150,7 @@ namespace todotxtlib.net
 			               where todo.ItemNumber == item
 			               select todo).FirstOrDefault();
 
-			if (target != null)
-			{
-				target.Prepend(newText);
-			}
+			target?.Prepend(newText);
 		}
 
 		public bool RemoveFromTask(int item, string term)
@@ -334,7 +325,7 @@ namespace todotxtlib.net
 			}
 			catch (Exception ex)
 			{
-				throw new TaskException("An error occurred while trying to update your task int the task list file", ex);
+				throw new TaskException("An error occurred while trying to update your task in the task list file", ex);
 			}
 		}
 
