@@ -13,6 +13,7 @@
     <RepositoryType></RepositoryType>
     <PackageTags>.NET Standard 1.3 todo.txt</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>.NET library for parsing the todo.txt file format</Description>
   </PropertyGroup>
 
   <ItemGroup>
