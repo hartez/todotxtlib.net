@@ -4,7 +4,7 @@
 todotxtlib.net.tests/bin/*
 todotxtlib.net.tests/obj/*
 todotxtlib.net.tests/*.user
-packages/*
+**/packages/*
 *.testsettings
 packages.config
 *.vsmdi
