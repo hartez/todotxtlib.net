@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -14,17 +13,17 @@ namespace todotxtlib.net
 		private bool _completed;
 
 		private DateTime? _completedDate;
-		private List<String> _contexts = new List<String>();
+		private List<string> _contexts = new List<string>();
 
 		private DateTime? _createdDate;
 
 		private int? _itemNumber;
 
-		private string _priority = String.Empty;
-		private List<String> _projects = new List<String>();
+		private string _priority = string.Empty;
+		private List<string> _projects = new List<string>();
 		private string _raw;
 
-		public Task(String raw, int? itemNumber)
+		public Task(string raw, int? itemNumber)
 		{
 			ItemNumber = itemNumber;
 
@@ -46,7 +45,7 @@ namespace todotxtlib.net
 		public Task(string priority, List<string> projects, List<string> contexts,
 		            string body, DateTime? createdDate, string dueDate, bool completed, DateTime? completedDate)
 		{
-			Priority = priority.Replace("(", String.Empty).Replace(")", String.Empty).ToUpperInvariant();
+			Priority = priority.Replace("(", string.Empty).Replace(")", string.Empty).ToUpperInvariant();
 
 			if (projects != null)
 			{
@@ -61,25 +60,25 @@ namespace todotxtlib.net
 			CreatedDate = createdDate;
 			DueDate = dueDate;
 
-			Body = body + (Contexts.Count() > 0 ? " " : String.Empty)
-			       + String.Join(" ", _contexts.ToArray())
-			       + (Projects.Count() > 0 ? " " : String.Empty)
-			       + String.Join(" ", Projects.ToArray())
-			       + (String.IsNullOrEmpty(dueDate) ? String.Empty : " due:" + dueDate);
+			Body = body + (Contexts.Any() ? " " : string.Empty)
+			       + string.Join(" ", _contexts.ToArray())
+			       + (Projects.Any() ? " " : string.Empty)
+			       + string.Join(" ", Projects.ToArray())
+			       + (string.IsNullOrEmpty(dueDate) ? string.Empty : " due:" + dueDate);
 
 			Completed = completed;
 			CompletedDate = completedDate;
 
-			Raw = (_completed ? "x " : String.Empty)
-			      + (!String.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : String.Empty)
-			      + (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
+			Raw = (_completed ? "x " : string.Empty)
+			      + (!string.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : string.Empty)
+			      + (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : string.Empty)
 			      + Body;
 		}
 
-		public String Body
+		public string Body
 		{
-			get { return _body; }
-			set
+			get => _body;
+            set
 			{
 				if (_body == value)
 				{
@@ -94,8 +93,8 @@ namespace todotxtlib.net
 
 		public DateTime? CompletedDate
 		{
-			get { return _completedDate; }
-			private set
+			get => _completedDate;
+            private set
 			{
 				if (_completedDate == value)
 				{
@@ -109,8 +108,8 @@ namespace todotxtlib.net
 
 		public DateTime? CreatedDate
 		{
-			get { return _createdDate; }
-			private set
+			get => _createdDate;
+            private set
 			{
 				if (_createdDate == value)
 				{
@@ -124,8 +123,8 @@ namespace todotxtlib.net
 
 		public int? ItemNumber
 		{
-			get { return _itemNumber; }
-			set
+			get => _itemNumber;
+            set
 			{
 				_itemNumber = value;
 				InvokePropertyChanged(new PropertyChangedEventArgs("ItemNumber"));
@@ -137,28 +136,28 @@ namespace todotxtlib.net
 			get { return _metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value); }
 		}
 
-		public IEnumerable<String> Projects
+		public IEnumerable<string> Projects
 		{
 			get { return _projects.Select(p => p); }
 		}
 
-		public IEnumerable<String> Contexts
+		public IEnumerable<string> Contexts
 		{
 			get { return _contexts.Select(p => p); }
 		}
 
-		public String Priority
+		public string Priority
 		{
-			get { return _priority; }
-			set
+			get => _priority;
+            set
 			{
 				if (_priority == value
-				    || (value == null && String.IsNullOrEmpty(_priority)))
+				    || (value == null && string.IsNullOrEmpty(_priority)))
 				{
 					return;
 				}
 
-				_priority = value != null ? value.ToUpperInvariant() : String.Empty;
+				_priority = value != null ? value.ToUpperInvariant() : string.Empty;
 
 				InvokePropertyChanged(new PropertyChangedEventArgs("Priority"));
 			}
@@ -166,15 +165,15 @@ namespace todotxtlib.net
 
 		public string Raw
 		{
-			get { return _raw; }
-			private set
+			get => _raw;
+            private set
 			{
 				_raw = value;
 				InvokePropertyChanged(new PropertyChangedEventArgs("Raw"));
 			}
 		}
 
-		public String DueDate
+		public string DueDate
 		{
 			get
 			{
@@ -183,7 +182,7 @@ namespace todotxtlib.net
 					return _metadata["due"];
 				}
 
-				return String.Empty;
+				return string.Empty;
 			}
 			set
 			{
@@ -207,8 +206,8 @@ namespace todotxtlib.net
 
 		public bool Completed
 		{
-			get { return _completed; }
-			set
+			get => _completed;
+            set
 			{
 				if (_completed == value)
 				{
@@ -221,7 +220,7 @@ namespace todotxtlib.net
 
 				if (!_completed && IsPriority)
 				{
-					Priority = String.Empty;
+					Priority = string.Empty;
 				}
 
 				if (_completed)
@@ -231,12 +230,9 @@ namespace todotxtlib.net
 			}
 		}
 
-		public bool IsPriority
-		{
-			get { return !String.IsNullOrEmpty(Priority); }
-		}
+		public bool IsPriority => !string.IsNullOrEmpty(Priority);
 
-		#region INotifyPropertyChanged Members
+        #region INotifyPropertyChanged Members
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
@@ -249,22 +245,22 @@ namespace todotxtlib.net
 
 		public void Empty()
 		{
-			Body = String.Empty;
+			Body = string.Empty;
 			CreatedDate = null;
-			Priority = String.Empty;
-			_contexts = new List<String>();
-			_projects = new List<String>();
+			Priority = string.Empty;
+			_contexts = new List<string>();
+			_projects = new List<string>();
 		}
 
-		private void ParseProjects(String todo)
+		private void ParseProjects(string todo)
 		{
 			_projects.Clear();
 
-            MatchCollection projects = Regex.Matches(todo, @"\s(\+\S*\w)");
+            var projects = Regex.Matches(todo, @"\s(\+\S*\w)");
 
 			foreach (Match match in projects)
 			{
-				String project = match.Groups[1].Captures[0].Value;
+				string project = match.Groups[1].Captures[0].Value;
 				_projects.Add(project);
 			}
 
@@ -279,7 +275,7 @@ namespace todotxtlib.net
 
 			foreach (Match match in contexts)
 			{
-				String context = match.Groups[1].Captures[0].Value;
+				string context = match.Groups[1].Captures[0].Value;
 				_contexts.Add(context);
 			}
 
@@ -294,7 +290,7 @@ namespace todotxtlib.net
 
 			foreach (Match match in metadata)
 			{
-				String data = match.Groups[1].Captures[0].Value;
+				string data = match.Groups[1].Captures[0].Value;
 				string[] kvp = data.Split(':');
 
 				AddToMetadata(kvp[0], kvp[1]);
@@ -329,7 +325,7 @@ namespace todotxtlib.net
 			}
 		}
 
-		private void ParseEverythingElse(String todo)
+		private void ParseEverythingElse(string todo)
 		{
 			Match everythingElse = Regex.Match(todo,
 			                                   @"(?:(?<done>[xX] (?:(?<completeddate>[0-9]{4}-[0-9]{2}-[0-9]{2}) )))?(?:\((?<priority>[A-Z])\) )?(?:(?<createddate>[0-9]{4}-[0-9]{2}-[0-9]{2}) )?(?<todo>.+)$");
@@ -363,7 +359,7 @@ namespace todotxtlib.net
 			}
 		}
 
-		private void ParseFields(String todo)
+		private void ParseFields(string todo)
 		{
 			ParseContexts(todo);
 			ParseProjects(todo);
@@ -374,17 +370,17 @@ namespace todotxtlib.net
 			ParseEverythingElse(todo);
 		}
 
-		public void Replace(String newTodo)
+		public void Replace(string newTodo)
 		{
 			ParseFields(newTodo);
 		}
 
-		public void Append(String toAppend)
+		public void Append(string toAppend)
 		{
 			ParseFields(Body + toAppend);
 		}
 
-		public void Prepend(String toPrepend)
+		public void Prepend(string toPrepend)
 		{
 			ParseFields(toPrepend + Body);
 		}
@@ -401,7 +397,7 @@ namespace todotxtlib.net
 			return false;
 		}
 
-		public String ToString(String numberFormat)
+		public string ToString(string numberFormat)
 		{
 			if (ItemNumber.HasValue)
 			{
@@ -411,23 +407,19 @@ namespace todotxtlib.net
 			return ToString();
 		}
 
-		public override String ToString()
+		public override string ToString()
 		{
 			return
-				(_completed ? "x " : String.Empty)
-				+ (_completed && CompletedDate.HasValue ? (CompletedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
-				+ (!String.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : String.Empty)
-				+ (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : String.Empty)
+				(_completed ? "x " : string.Empty)
+				+ (_completed && CompletedDate.HasValue ? (CompletedDate.Value.ToString("yyyy-MM-dd") + " ") : string.Empty)
+				+ (!string.IsNullOrEmpty(Priority) ? "(" + Priority + ") " : string.Empty)
+				+ (CreatedDate.HasValue ? (CreatedDate.Value.ToString("yyyy-MM-dd") + " ") : string.Empty)
 				+ Body;
 		}
 
 		public void InvokePropertyChanged(PropertyChangedEventArgs e)
 		{
-			PropertyChangedEventHandler handler = PropertyChanged;
-			if (handler != null)
-			{
-				handler(this, e);
-			}
-		}
+            PropertyChanged?.Invoke(this, e);
+        }
 	}
 }

@@ -102,9 +102,7 @@ namespace todotxtlib.net
 
 		public void SetItemPriority(int item, string priority)
 		{
-			Task target = (from todo in this
-			               where todo.ItemNumber == item
-			               select todo).FirstOrDefault();
+			var target = GetTask(item);
 
 			if (target != null)
 			{
@@ -114,9 +112,7 @@ namespace todotxtlib.net
 
 		private bool ReplaceItemText(int item, string oldText, string newText)
 		{
-			Task target = (from todo in this
-			               where todo.ItemNumber == item
-			               select todo).FirstOrDefault();
+            var target = GetTask(item);
 
 			if (target != null)
 			{
@@ -126,31 +122,26 @@ namespace todotxtlib.net
 			return false;
 		}
 
-		public void ReplaceInTask(int item, string newText)
-		{
-			Task target = (from todo in this
-			               where todo.ItemNumber == item
-			               select todo).FirstOrDefault();
+        public Task GetTask(int itemNumber)
+        {
+            return (from todo in this
+                where todo.ItemNumber == itemNumber
+                select todo).FirstOrDefault();
+        }
 
-			target?.Replace(newText);
+        public void ReplaceInTask(int item, string newText)
+		{
+			GetTask(item)?.Replace(newText);
 		}
 
 		public void AppendToTask(int item, string newText)
 		{
-			Task target = (from todo in this
-			               where todo.ItemNumber == item
-			               select todo).FirstOrDefault();
-
-			target?.Append(newText);
+            GetTask(item)?.Append(newText);
 		}
 
 		public void PrependToTask(int item, string newText)
 		{
-			Task target = (from todo in this
-			               where todo.ItemNumber == item
-			               select todo).FirstOrDefault();
-
-			target?.Prepend(newText);
+            GetTask(item)?.Prepend(newText);
 		}
 
 		public bool RemoveFromTask(int item, string term)
@@ -197,7 +188,7 @@ namespace todotxtlib.net
 					Remove(target);
 
 					int itemNumber = 1;
-					foreach (Task todo in this)
+					foreach (var todo in this)
 					{
 						todo.ItemNumber = itemNumber;
 						itemNumber += 1;
