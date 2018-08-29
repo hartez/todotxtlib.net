@@ -88,7 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\todotxtlib.net.standard\todotxtlib.net.standard.csproj">
-      <Project>{a1d61ccd-4aa7-4a1a-a204-507e8ecb5592}</Project>
+      <Project>{A1D61CCD-4AA7-4A1A-A204-507E8ECB5592}</Project>
       <Name>todotxtlib.net.standard</Name>
     </ProjectReference>
   </ItemGroup>
