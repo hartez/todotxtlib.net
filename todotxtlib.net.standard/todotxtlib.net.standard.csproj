@@ -16,21 +16,4 @@
     <Description>.NET library for parsing the todo.txt file format</Description>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="..\DiffMatchPatch\DiffMatchPatch.cs" Link="DiffMatchPatch\DiffMatchPatch.cs" />
-    <Compile Include="..\StringExtensions.cs" Link="StringExtensions.cs" />
-    <Compile Include="..\Task.cs" Link="Task.cs" />
-    <Compile Include="..\TaskEqualityComparer.cs" Link="TaskEqualityComparer.cs" />
-    <Compile Include="..\TaskException.cs" Link="TaskException.cs" />
-    <Compile Include="..\TaskList.cs" Link="TaskList.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="DiffMatchPatch\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\DiffMatchPatch\COPYING" Link="DiffMatchPatch\COPYING" />
-  </ItemGroup>
-
 </Project>
