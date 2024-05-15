@@ -14,4 +14,4 @@ Sub-goals include:
 
 Thanks go to [benrhughes](https://github.com/benrhughes) for contributions to the code, better naming conventions, and the bulk of the unit tests.
 
-This library is available via NuGet at http://packages.nuget.org/packages/todotxtlib.net
+This library is available via NuGet at https://packages.nuget.org/packages/todotxtlib.net
