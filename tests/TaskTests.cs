@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
-using NUnit.Framework;
+using Xunit;
 
 namespace todotxtlib.net.tests
 {
-    [TestFixture]
     public class TaskTests
     {
         List<string> _projects = new List<string>() { "+test" };
         List<string> _contexts = new List<string>() { "@work" };
 
-        [Test]
+        [Fact]
         public void Priority_Case()
         {
             // Should have a priority of A
@@ -28,38 +26,38 @@ namespace todotxtlib.net.tests
             // Should fix up the priority in the constructor
             var task4 = new Task("a", null, null, "This is a test task");
 
-            Assert.AreEqual(task1.Priority, "A");
-            Assert.AreEqual(task3.Priority, "A");
-            Assert.AreEqual(task4.Priority, "A");
+            Assert.Equal(task1.Priority, "A");
+            Assert.Equal(task3.Priority, "A");
+            Assert.Equal(task4.Priority, "A");
 
-            Assert.AreEqual(task2.Priority, "");
-            Assert.AreEqual(task2.Body, "(a) This is a test task");
+            Assert.Equal(task2.Priority, "");
+            Assert.Equal(task2.Body, "(a) This is a test task");
 
             // The setter should fix this up
             task2.Priority = "a";
-            Assert.AreEqual(task2.Priority, "A");
-            Assert.AreEqual(task2.Body, "(a) This is a test task");
+            Assert.Equal(task2.Priority, "A");
+            Assert.Equal(task2.Body, "(a) This is a test task");
         }
 
-        [Test]
+        [Fact]
         public void CompletedDate()
         {
             var task1 = new Task("x 2011-03-01 2010-12-31 This task should be completed");
 
-            Assert.IsTrue(task1.CompletedDate != null);
-            Assert.AreEqual(new DateTime(2011, 3, 1), task1.CompletedDate);
+            Assert.True(task1.CompletedDate != null);
+            Assert.Equal(new DateTime(2011, 3, 1), task1.CompletedDate);
 
             var task2 = new Task("2010-12-31 This task should not be completed");
 
-            Assert.IsNull(task2.CompletedDate);
+            Assert.Null(task2.CompletedDate);
 
             var task3 = new Task(task1.ToString());
-            Assert.IsTrue(task3.CompletedDate != null);
-            Assert.AreEqual(new DateTime(2011, 3, 1), task3.CompletedDate);
+            Assert.True(task3.CompletedDate != null);
+            Assert.Equal(new DateTime(2011, 3, 1), task3.CompletedDate);
         }
 
         #region Create
-        [Test]
+        [Fact]
         public void Create_Priority_Body_Project_Context()
         {
             var task = new Task("(A) This is a test task @work +test");
@@ -68,7 +66,7 @@ namespace todotxtlib.net.tests
             AssertEquivalence(expectedTask, task);
         }
 
-        [Test]
+        [Fact]
         public void Create_Priority_Body_Context_Project()
         {
             var task = new Task("(A) This is a test task @work +test");
@@ -77,7 +75,7 @@ namespace todotxtlib.net.tests
             AssertEquivalence(expectedTask, task);
         }
 
-        [Test]
+        [Fact]
         public void Create_Trailing_Whitespace()
         {
             var task = new Task("(A) This is a test task @work +test ");
@@ -86,7 +84,7 @@ namespace todotxtlib.net.tests
             AssertEquivalence(expectedTask, task);
         }
 
-        [Test]
+        [Fact]
         public void Create_Null_Priority()
         {
             var task = new Task("This is a test task @work +test ");
@@ -95,7 +93,7 @@ namespace todotxtlib.net.tests
             AssertEquivalence(expectedTask, task);
         }
 
-        [Test]
+        [Fact]
         public void Create_Priority_In_Body()
         {
             var task = new Task("Oh (A) This is a test task @work +test ");
@@ -104,7 +102,7 @@ namespace todotxtlib.net.tests
             AssertEquivalence(expectedTask, task);
         }
 
-		[Test]
+		[Fact]
 		public void Create_Project_In_Body()
 		{
 			var task = new Task("Oh (A) This is a test task @work +test ");
@@ -112,7 +110,7 @@ namespace todotxtlib.net.tests
 			Assert.True(task.Projects.Contains("+test"));
 		}
 
-        [Test]
+        [Fact]
         public void Create_Priority_Context_Project_Body()
         {
             var task = new Task("(A) This is a test task @work +test");
@@ -121,13 +119,13 @@ namespace todotxtlib.net.tests
             AssertEquivalence(expectedTask, task);
         }
 
-        [Test]
+        [Fact]
         public void Create_Completed()
         {
             // Not completed - the completed date is required
             var task = new Task("X (A) This is a test task @work +test ");
 
-            Assert.IsFalse(task.Completed);
+            Assert.False(task.Completed);
 
             // Completed
             var task2 = new Task("X 2005-06-03 This is a test task @work +test ");
@@ -136,7 +134,7 @@ namespace todotxtlib.net.tests
             AssertEquivalence(expectedTask, task2);
         }
 
-        [Test]
+        [Fact]
         public void Create_UnCompleted()
         {
             var task = new Task("(A) This is a test task @work +test");
@@ -145,7 +143,7 @@ namespace todotxtlib.net.tests
             AssertEquivalence(expectedTask, task);
         }
 
-        [Test]
+        [Fact]
         public void Create_Multiple_Projects()
         {
             var task = new Task("(A) This is a test task @work +test +test2");
@@ -154,7 +152,7 @@ namespace todotxtlib.net.tests
             AssertEquivalence(expectedTask, task);
         }
 
-        [Test]
+        [Fact]
         public void Create_Multiple_Contexts()
         {
             var task = new Task("(A) This is a test task @work @home +test");
@@ -163,7 +161,7 @@ namespace todotxtlib.net.tests
             AssertEquivalence(expectedTask, task);
         }
 
-        [Test]
+        [Fact]
         public void Create_DueDate()
         {
             var task = new Task("(A) This is a test task @work @home +test due:2011-05-08");
@@ -176,7 +174,7 @@ namespace todotxtlib.net.tests
 
 		#region INotifyPropertyChanged Tests
 
-		[Test]
+		[Fact]
 		public void PropertyChanges()
 		{
 			var task = new Task("A", new List<string> {"+fixsink", "+writenovel"},
@@ -222,38 +220,38 @@ namespace todotxtlib.net.tests
 
     	#endregion
 
-		[Test]
+		[Fact]
 		public void BodyOnly()
 		{
 			var task = new Task("test");
 
-			Assert.IsNotEmpty(task.Body, "Body is empty");
-			Assert.AreEqual("test", task.Body);
+			Assert.NotEmpty(task.Body);
+			Assert.Equal("test", task.Body);
 
 			task.Body = "test2";
-			Assert.IsNotEmpty(task.Body, "Body is empty");
-			Assert.AreEqual("test2", task.Body);
+			Assert.NotEmpty(task.Body);
+			Assert.Equal("test2", task.Body);
 		}
 
     	#region ToString
 
-		[Test]
+		[Fact]
         public void ToString_From_Raw()
         {
             var task = new Task("(A) @work +test This is a test task");
-            Assert.AreEqual("(A) @work +test This is a test task", task.ToString());
+            Assert.Equal("(A) @work +test This is a test task", task.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ToString_From_Parameters()
         {
             var task = new Task("(A)", _projects, _contexts, "This is a test task");
-            Assert.AreEqual("(A) This is a test task @work +test", task.ToString());
+            Assert.Equal("(A) This is a test task @work +test", task.ToString());
         }
 
         #endregion
 
-		[Test]
+		[Fact]
 		public void Equality()
 		{
 			var rawString = "This is a task @online @home +project +anotherproject";
@@ -263,130 +261,138 @@ namespace todotxtlib.net.tests
 
 			IEqualityComparer<Task> comparer = new TaskEqualityComparer();
 
-			Assert.IsTrue(comparer.Equals(a, b));
-			Assert.IsFalse(comparer.Equals(b, c));
-			Assert.IsFalse(comparer.Equals(a, c));
+			Assert.True(comparer.Equals(a, b));
+			Assert.False(comparer.Equals(b, c));
+			Assert.False(comparer.Equals(a, c));
 		}
 
     	static void AssertEquivalence(Task t1, Task t2)
         {
-            Assert.AreEqual(t1.Priority, t2.Priority);
-            CollectionAssert.AreEquivalent(t1.Projects, t2.Projects);
-            CollectionAssert.AreEquivalent(t1.Contexts, t2.Contexts);
-            Assert.AreEqual(t1.DueDate, t2.DueDate);
-            Assert.AreEqual(t1.Completed, t2.Completed);
-            Assert.AreEqual(t1.Body, t2.Body);
+            Assert.Equal(t1.Priority, t2.Priority);
+            Assert.Equivalent(t1.Projects, t2.Projects);
+            Assert.Equivalent(t1.Contexts, t2.Contexts);
+            Assert.Equal(t1.DueDate, t2.DueDate);
+            Assert.Equal(t1.Completed, t2.Completed);
+            Assert.Equal(t1.Body, t2.Body);
         }
 
-		[Test]
+		[Fact]
 		public void RecognizePhoneNumber()
 		{
 			var task = new Task("This task contains the phone number 720-564-1231");
 
-			Assert.That(task.Metadata["phone"] == "720-564-1231"); 
+			Assert.True(task.Metadata["phone"] == "720-564-1231"); 
 		}
 
-		[Test]
+		[Fact]
 		public void ExplicitPhoneNumber()
 		{
 			var task = new Task("This task contains an explicit phone number phone:720-564-1231");
 
-			Assert.That(task.Metadata["phone"] == "720-564-1231"); 
+			Assert.True(task.Metadata["phone"] == "720-564-1231"); 
 		}
 
-		[Test]
+		[Fact]
 		public void MultipleRecognizePhoneNumber()
 		{
 			var task = new Task("This task contains the phone number (720) 564-1231 and the number (317)228-1231");
 
-			Assert.That(task.Metadata.ContainsKey("phone"), "Metadata should have key 'phone'");
-			Assert.That(task.Metadata.ContainsKey("phone1"), "Metadata should have key 'phone1'");
+			Assert.True(task.Metadata.ContainsKey("phone"), "Metadata should have key 'phone'");
+			Assert.True(task.Metadata.ContainsKey("phone1"), "Metadata should have key 'phone1'");
 
-			Assert.That(task.Metadata["phone"] == "(720) 564-1231", "'phone' should be (720) 564-1231");
-			Assert.That(task.Metadata["phone1"] == "(317)228-1231", "'phone1' should be (317)228-1231");
+			Assert.True(task.Metadata["phone"] == "(720) 564-1231", "'phone' should be (720) 564-1231");
+			Assert.True(task.Metadata["phone1"] == "(317)228-1231", "'phone1' should be (317)228-1231");
 		}
 
-		[Test]
+		[Fact]
 		public void MultipleExplicitPhoneNumber()
 		{
 			var task = new Task("This task contains an explicit phone:720-564-1231 and another phone:317.228.1231");
 
-			Assert.That(task.Metadata["phone"] == "720-564-1231", "'phone' should have been 720-564-1231");
-			Assert.That(task.Metadata["phone1"] == "317.228.1231", "'phone1' should have been 317.228.1231");
+			Assert.True(task.Metadata["phone"] == "720-564-1231", "'phone' should have been 720-564-1231");
+			Assert.True(task.Metadata["phone1"] == "317.228.1231", "'phone1' should have been 317.228.1231");
 		}
 
-		[Test]
+		[Fact]
 		public void MultipleMixedPhoneNumber()
 		{
 			var task = new Task("This task contains an explicit phone:720-564-1231 and another 317-228-1231");
 
-			Assert.That(task.Metadata["phone"] == "720-564-1231");
-			Assert.That(task.Metadata["phone1"] == "317-228-1231");
+			Assert.True(task.Metadata["phone"] == "720-564-1231");
+			Assert.True(task.Metadata["phone1"] == "317-228-1231");
 
 			// Different order; explicit metadata should still be first
 			task = new Task("This task contains a number 720-564-1231 and another phone:317-228-1231 ");
 
-			Assert.That(task.Metadata["phone"] == "317-228-1231");
-			Assert.That(task.Metadata["phone1"] == "720-564-1231");
+			Assert.True(task.Metadata["phone"] == "317-228-1231");
+			Assert.True(task.Metadata["phone1"] == "720-564-1231");
 		}
 
-        [Test(Description = "A project or context contains any non-whitespace character and must end in an alphanumeric or ‘_’. ")]
+        [Fact]
         public void ShouldAllowProjectWithHyphen()
         {
+            // "A project or context contains any non-whitespace character and must end in an alphanumeric or ‘_’. "
+
             var task = new Task("This task contains a project with a hypen +hyphen-project @home");
 
-            Assert.That(task.Projects.Contains("+hyphen-project"));
+            Assert.True(task.Projects.Contains("+hyphen-project"));
         }
 
-        [Test(Description = "A project or context contains any non-whitespace character and must end in an alphanumeric or ‘_’. ")]
+        [Fact]
         public void ShouldAllowContextWithHyphen()
         {
+            // "A project or context contains any non-whitespace character and must end in an alphanumeric or ‘_’. "
+
             var task = new Task("This task contains a project with a hypen @hyphen-context @home");
 
-            Assert.That(task.Contexts.Contains("@hyphen-context"));
+            Assert.True(task.Contexts.Contains("@hyphen-context"));
         }
 
-        [Test(Description = "A project or context contains any non-whitespace character and must end in an alphanumeric or ‘_’. ")]
+        [Fact]
         public void ProjectMustEndWithAlphanumericOrUnderscore()
         {
+            // "A project or context contains any non-whitespace character and must end in an alphanumeric or ‘_’. "
+
             var task = new Task("This task has only one project with a hyphen in it +hyphen-project +nohyphen-");
 
-            Assert.That(task.Projects.Contains("+hyphen-project"));
+            Assert.True(task.Projects.Contains("+hyphen-project"));
             Assert.False(task.Projects.Contains("+nohyphen-"));
-            Assert.That(task.Projects.Contains("+nohyphen"));
+            Assert.True(task.Projects.Contains("+nohyphen"));
         }
 
-        [Test(Description = "A project or context contains any non-whitespace character and must end in an alphanumeric or ‘_’. ")]
+        [Fact]
         public void ContextMustEndWithAlphanumericOrUnderscore()
         {
+            // "A project or context contains any non-whitespace character and must end in an alphanumeric or ‘_’. "
+
             var task = new Task("This task has only one valid context @hyphen-context @nohyphen-");
 
-            Assert.That(task.Contexts.Contains("@hyphen-context"));
-            Assert.False(task.Contexts.Contains("@nohyphen-"));
-            Assert.That(task.Contexts.Contains("@nohyphen"));
+            Assert.True(task.Contexts.Contains("@hyphen-context"));
+            Assert.DoesNotContain("@nohyphen-", task.Contexts);
+            Assert.True(task.Contexts.Contains("@nohyphen"));
         }
 
-        [Test]
+        [Fact]
         public void MetaDataMustNotHaveWhitespaceAfterColon()
         {
             var task =
                 new Task(
                     "due:2014-07-02 Get back to work on project x Ansel 453.456.8967  Jim 432.453.9134  Bob's cell: 812.477.7272");
 
-            Assert.That(task.DueDate == "2014-07-02");
+            Assert.True(task.DueDate == "2014-07-02");
             Assert.False(task.Metadata.ContainsKey("cell"), "metadata cannot have whitespace");
         }
 
-        [Test]
+        [Fact]
         public void MultiplePhoneNumbersShouldNotConflict()
         {
             var task =
                 new Task(
                     "due:2014-07-02 Get back to work on project x Ansel 453.456.8967  Jim 432.453.9134  Bob's cell: 812.477.7272");
 
-            Assert.That(task.Metadata["phone"] == "453.456.8967");
-            Assert.That(task.Metadata["phone1"] == "432.453.9134");
-            Assert.That(task.Metadata["phone2"] == "812.477.7272");
+            Assert.True(task.Metadata["phone"] == "453.456.8967");
+            Assert.True(task.Metadata["phone1"] == "432.453.9134");
+            Assert.True(task.Metadata["phone2"] == "812.477.7272");
         }
     }
 }

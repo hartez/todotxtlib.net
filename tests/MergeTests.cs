@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
-using NUnit.Framework;
+using Xunit;
 
 namespace todotxtlib.net.tests
 {
-    [TestFixture]
-    internal class MergeTests
+    public class MergeTests : IDisposable
     {
         private string _originalPath = "merge0.txt";
         private string _location1Path = "merge1.txt";
@@ -14,8 +12,7 @@ namespace todotxtlib.net.tests
 
         private TaskList _mergeResult;
 
-        [SetUp]
-        public void Setup()
+        public MergeTests()
         {
             var t0 = new TaskList(_originalPath);
 
@@ -26,49 +23,54 @@ namespace todotxtlib.net.tests
             _mergeResult = TaskList.Merge(t0, t1, t2);
         }
 
-        [Test]
+        [Fact]
         public void Priority_Change()
         {
             var checkupTask = _mergeResult.Search("checkup").First();
 
-            Assert.That(checkupTask.Priority == "D");
+            Assert.Equal("D", checkupTask.Priority);
         }
 
-        [Test]
+        [Fact]
         public void Line_Removed()
         {
             var task = _mergeResult.Search("milk").FirstOrDefault();
 
-            Assert.IsNull(task);
+            Assert.Null(task);
         }
 
-        [Test]
+        [Fact]
         public void Line_Multiple_Changes()
         {
             var task = _mergeResult.Search("herb").FirstOrDefault();
 
-            Assert.IsNotNull(task);
-            Assert.That(task.ToString().Contains("Plant"));
-            Assert.That(task.ToString().Contains("vegetable"));
+            Assert.NotNull(task);
+            Assert.Contains("Plant", task.ToString());
+            Assert.Contains("vegetable", task.ToString());
         }
 
-        [Test]
+        [Fact]
         public void Conflict_Last_In_Wins()
         {
             var task = _mergeResult.Search("mobile").FirstOrDefault();
 
-            Assert.IsNotNull(task);
-            Assert.That(task.Completed == false); // Was complete in original and merge1, not complete in merge2
+            Assert.NotNull(task);
+            Assert.False(task.Completed); // Was complete in original and merge1, not complete in merge2
         }
 
-        [Test]
+        [Fact]
         public void Contains_Tasks_Added_In_Both()
         {
             var task1 = _mergeResult.Search("Star").FirstOrDefault();
             var task2 = _mergeResult.Search("videos").FirstOrDefault();
 
-            Assert.IsNotNull(task1);
-            Assert.IsNotNull(task2);
+            Assert.NotNull(task1);
+            Assert.NotNull(task2);
+        }
+
+        public void Dispose()
+        {
+            
         }
     }
 }

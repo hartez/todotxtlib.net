@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using NUnit.Framework;
+using Xunit;
 
 namespace todotxtlib.net.tests
 {
-    [TestFixture]
-	internal class TaskListTests
+	public class TaskListTests
 	{
 		private string _testDataPath = "testtasks.txt";
 
@@ -19,7 +18,7 @@ namespace todotxtlib.net.tests
 			return tempTaskFile;
 		}
 
-		[Test]
+		[Fact]
 		public void SelectMany()
 		{
 			string tempTaskFile = CreateTempTasksFile();
@@ -27,10 +26,10 @@ namespace todotxtlib.net.tests
 			IOrderedEnumerable<string> contexts = tl.SelectMany(task => task.Contexts,
 			                                                    (task, context) => context).Distinct().OrderBy(context => context);
 
-			Assert.AreEqual(3, contexts.Count());
+			Assert.Equal(3, contexts.Count());
 		}
 
-		[Test]
+		[Fact]
 		public void Add_Multiple()
 		{
 			var tl = new TaskList(_testDataPath);
@@ -42,10 +41,10 @@ namespace todotxtlib.net.tests
 			var task2 = new Task("Add_Multiple task two");
 			tl.Add(task2);
 
-			Assert.AreEqual(c + 2, tl.Count());
+			Assert.Equal(c + 2, tl.Count());
 		}
 
-		[Test]
+		[Fact]
 		public void Add_ToCollection()
 		{
 			var task = new Task("(B) Add_ToCollection +test @task");
@@ -59,13 +58,13 @@ namespace todotxtlib.net.tests
 
 			List<Task> newTasks = tl.ToList();
 
-			Assert.AreEqual(tasks.Count, newTasks.Count);
+			Assert.Equal(tasks.Count, newTasks.Count);
 
 			for (int i = 0; i < tasks.Count; i++)
-				Assert.AreEqual(tasks[i].ToString(), newTasks[i].ToString());
+				Assert.Equal(tasks[i].ToString(), newTasks[i].ToString());
 		}
 
-		[Test]
+		[Fact]
 		public void Add_ToFile()
 		{
 			// Create a copy of test data so we can leave the original alone
@@ -80,13 +79,14 @@ namespace todotxtlib.net.tests
 			tl.SaveTasks(tempTaskFile);
 
 			string[] newFileContents = File.ReadAllLines(tempTaskFile);
-			CollectionAssert.AreEquivalent(fileContents, newFileContents);
+
+			Assert.Equivalent(fileContents, newFileContents);
 
 			// Clean up
 			File.Delete(tempTaskFile);
 		}
 
-        [Test]
+        [Fact]
         public void BlankLinesAreEmptyTasks()
         {
             // Create a copy of test data so we can leave the original alone
@@ -103,10 +103,10 @@ namespace todotxtlib.net.tests
 
             var tl2 = new TaskList(tempTaskFile);
 
-            Assert.AreEqual(originalCount + 2, tl2.Count, "Added two lines, one of which was blank (empty)");
+            Assert.Equal(originalCount + 2, tl2.Count); // "Added two lines, one of which was blank (empty)"
         }
 
-	    [Test]
+	    [Fact]
 		public void Add_To_Empty_File()
 		{
 			// v0.3 and earlier contained a bug where a blank task was added
@@ -116,19 +116,19 @@ namespace todotxtlib.net.tests
 			var tl = new TaskList(tempTaskFile);
 			tl.Add(new Task("A task"));
 
-			Assert.AreEqual(1, tl.Count());
+			Assert.Equal(1, tl.Count());
 
 			// Clean up
 			File.Delete(tempTaskFile);
 		}
 
-		[Test]
+		[Fact]
 		public void Construct()
 		{
 			var tl = new TaskList(_testDataPath);
 		}
 
-		[Test]
+		[Fact]
 		public void Delete_InCollection()
 		{
 			var task = new Task("(B) Delete_InCollection +test @task");
@@ -142,13 +142,13 @@ namespace todotxtlib.net.tests
 
 			List<Task> newTasks = tl.ToList();
 
-			Assert.AreEqual(tasks.Count, newTasks.Count);
+			Assert.Equal(tasks.Count, newTasks.Count);
 
 			for (int i = 0; i < tasks.Count; i++)
-				Assert.AreEqual(tasks[i].ToString(), newTasks[i].ToString());
+				Assert.Equal(tasks[i].ToString(), newTasks[i].ToString());
 		}
 
-		[Test]
+		[Fact]
 		public void Delete_InFile()
 		{
 			string tempTasksFile = CreateTempTasksFile();
@@ -164,7 +164,7 @@ namespace todotxtlib.net.tests
 				tl.SaveTasks(tempTasksFile);
 
 				string[] newFileContents = File.ReadAllLines(tempTasksFile);
-				CollectionAssert.AreEquivalent(fileContents, newFileContents);
+				Assert.Equivalent(fileContents, newFileContents);
 			}
 			finally
 			{
@@ -172,14 +172,14 @@ namespace todotxtlib.net.tests
 			}
 		}
 
-        [Test]
+        [Fact]
         public void Load_From_File()
         {
             var tl = new TaskList(_testDataPath);
             IEnumerable<Task> tasks = tl.AsEnumerable();
         }
 
-		[Test]
+		[Fact]
 		public void Load_From_Stream_Repeated()
 		{
 			var s = new Stopwatch();
@@ -199,7 +199,7 @@ namespace todotxtlib.net.tests
 			Debug.WriteLine(s.Elapsed);
 		}
 
-		[Test]
+		[Fact]
 		public void Load_From_Stream()
 		{
 			using (FileStream fs = File.OpenRead(_testDataPath))
@@ -208,11 +208,11 @@ namespace todotxtlib.net.tests
 
 				tl.LoadTasks(fs);
 
-				Assert.AreEqual(8, tl.Count);
+				Assert.Equal(8, tl.Count);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void ObservableChanges()
 		{
 			var tl = new TaskList();
@@ -235,10 +235,10 @@ namespace todotxtlib.net.tests
 
 			tl[0].Append("Test append for propertychanged event firing");
 
-			Assert.True(fired);
+				Assert.True(fired);
 		}
 
-		[Test]
+		[Fact]
 		public void Save_To_Stream()
 		{
 			string tempTaskFile = CreateTempTasksFile();
@@ -261,10 +261,10 @@ namespace todotxtlib.net.tests
 
 			var tl2 = new TaskList(tempTaskFileCopy);
 
-			Assert.AreEqual(tl.Count, tl2.Count);
+			Assert.Equal(tl.Count, tl2.Count);
 		}
 
-		[Test]
+		[Fact]
 		public void Search()
 		{
 			string tempTasksFile = CreateTempTasksFile();
@@ -272,22 +272,22 @@ namespace todotxtlib.net.tests
 
 			// There should be two task which contain the term 'foo'
 			TaskList fooTaskList = tl.Search("foo");
-			Assert.IsNotNull(fooTaskList);
-			Assert.AreEqual(2, fooTaskList.Count);
+			Assert.NotNull(fooTaskList);
+			Assert.Equal(2, fooTaskList.Count);
 
 			// Search should be case insenstive
 			TaskList caseInsensitiveTaskList = tl.Search("Foo");
-			Assert.IsNotNull(caseInsensitiveTaskList);
-			Assert.AreEqual(2, caseInsensitiveTaskList.Count);
+			Assert.NotNull(caseInsensitiveTaskList);
+			Assert.Equal(2, caseInsensitiveTaskList.Count);
 
 			// '-' in front of the term should find all tasks without the term
 			TaskList notFooTaskList = tl.Search("-foo");
 			// So searching the list generated by the negative search for the term
 			// should give us an empty list
-			Assert.AreEqual(0, notFooTaskList.Search("foo").Count);
+			Assert.Equal(0, notFooTaskList.Search("foo").Count);
 		}
 
-		[Test]
+		[Fact]
 		public void ToggleComplete_Off_InCollection()
 		{
 			// Not complete - doesn't include completed date
@@ -301,7 +301,7 @@ namespace todotxtlib.net.tests
 
 			task = tl.Last();
 
-			Assert.IsTrue(task.Completed);
+			Assert.True(task.Completed);
 
 			var task2 = new Task("X 2011-02-25 ToggleComplete_Off_InCollection +test @task");
 
@@ -313,10 +313,10 @@ namespace todotxtlib.net.tests
 
 			task = tl.Last();
 
-			Assert.IsFalse(task.Completed);
+			Assert.False(task.Completed);
 		}
 
-		[Test]
+		[Fact]
 		public void ToggleComplete_On_InCollection()
 		{
 			var task = new Task("(B ToggleComplete_On_InCollection +test @task");
@@ -329,10 +329,10 @@ namespace todotxtlib.net.tests
 
 			task = tl.Last();
 
-			Assert.IsTrue(task.Completed);
+			Assert.True(task.Completed);
 		}
 
-		[Test]
+		[Fact]
 		public void Update_InCollection()
 		{
 			var task = new Task("(B) Update_InCollection +test @task");
@@ -346,10 +346,10 @@ namespace todotxtlib.net.tests
 			tl.Update(task, task2);
 
 			Task newTask = tl.Last();
-			Assert.IsTrue(newTask.Completed);
+			Assert.True(newTask.Completed);
 		}
 
-        [Test]
+        [Fact]
         public void LoadTasksFromString()
         {
             var text = @"
@@ -361,8 +361,8 @@ the previous line was blank";
             var tl = new TaskList();
             tl.LoadTasksFromString(text);
 
-            Assert.That(tl.Count == 5);
-            Assert.That(tl.Search("previous").Any());
+            Assert.True(tl.Count == 5);
+            Assert.True(tl.Search("previous").Any());
         }
 	}
 }
