@@ -8,8 +8,8 @@ namespace todotxtlib.net.tests
 {
     public class TaskTests
     {
-        List<string> _projects = new List<string>() { "+test" };
-        List<string> _contexts = new List<string>() { "@work" };
+        List<string> _projects = ["+test"];
+        List<string> _contexts = ["@work"];
 
         [Fact]
         public void Priority_Case()
@@ -26,17 +26,17 @@ namespace todotxtlib.net.tests
             // Should fix up the priority in the constructor
             var task4 = new Task("a", null, null, "This is a test task");
 
-            Assert.Equal(task1.Priority, "A");
-            Assert.Equal(task3.Priority, "A");
-            Assert.Equal(task4.Priority, "A");
+            Assert.Equal("A", task1.Priority);
+            Assert.Equal("A", task3.Priority);
+            Assert.Equal("A", task4.Priority);
 
-            Assert.Equal(task2.Priority, "");
-            Assert.Equal(task2.Body, "(a) This is a test task");
+            Assert.Equal("", task2.Priority);
+            Assert.Equal("(a) This is a test task", task2.Body);
 
             // The setter should fix this up
             task2.Priority = "a";
-            Assert.Equal(task2.Priority, "A");
-            Assert.Equal(task2.Body, "(a) This is a test task");
+            Assert.Equal("A", task2.Priority);
+            Assert.Equal("(a) This is a test task", task2.Body);
         }
 
         [Fact]
@@ -107,7 +107,7 @@ namespace todotxtlib.net.tests
 		{
 			var task = new Task("Oh (A) This is a test task @work +test ");
 
-			Assert.True(task.Projects.Contains("+test"));
+			Assert.Contains("+test", task.Projects);
 		}
 
         [Fact]
@@ -148,7 +148,7 @@ namespace todotxtlib.net.tests
         {
             var task = new Task("(A) This is a test task @work +test +test2");
 
-            var expectedTask = new Task("(A)", new List<string>() { "+test", "+test2" }, _contexts, "This is a test task");
+            var expectedTask = new Task("(A)", ["+test", "+test2"], _contexts, "This is a test task");
             AssertEquivalence(expectedTask, task);
         }
 
@@ -157,7 +157,7 @@ namespace todotxtlib.net.tests
         {
             var task = new Task("(A) This is a test task @work @home +test");
 
-            var expectedTask = new Task("(A)", _projects, new List<string>() { "@work", "@home" }, "This is a test task");
+            var expectedTask = new Task("(A)", _projects, ["@work", "@home"], "This is a test task");
             AssertEquivalence(expectedTask, task);
         }
 
@@ -166,7 +166,7 @@ namespace todotxtlib.net.tests
         {
             var task = new Task("(A) This is a test task @work @home +test due:2011-05-08");
 
-            var expectedTask = new Task("(A)", _projects, new List<string>() { "@work", "@home" }, "This is a test task", null, "2011-05-08", false, null);
+            var expectedTask = new Task("(A)", _projects, ["@work", "@home"], "This is a test task", null, "2011-05-08", false, null);
             AssertEquivalence(expectedTask, task);
         }
 
@@ -177,15 +177,15 @@ namespace todotxtlib.net.tests
 		[Fact]
 		public void PropertyChanges()
 		{
-			var task = new Task("A", new List<string> {"+fixsink", "+writenovel"},
-			                    new List<string> {"@home", "@work"},
+            var task = new Task("A", ["+fixsink", "+writenovel"],
+			                    ["@home", "@work"],
 			                    "Write a chapter about fixing the sink");
 
 			task.DueDate = DateTime.Now.AddDays(3).ToString();
 
 			bool fired = false;
 
-			List<String> changedProperties = new List<string>();
+			List<String> changedProperties = [];
 
 			task.PropertyChanged += (sender, e) =>
 				{
@@ -255,11 +255,11 @@ namespace todotxtlib.net.tests
 		public void Equality()
 		{
 			var rawString = "This is a task @online @home +project +anotherproject";
-			Task a = new Task(rawString);
-			Task b = new Task(rawString);
-			Task c = new Task("This is different task @home +anotherproject");
+			Task a = new(rawString);
+			Task b = new(rawString);
+			Task c = new("This is different task @home +anotherproject");
 
-			IEqualityComparer<Task> comparer = new TaskEqualityComparer();
+			var comparer = new TaskEqualityComparer();
 
 			Assert.True(comparer.Equals(a, b));
 			Assert.False(comparer.Equals(b, c));
@@ -281,7 +281,7 @@ namespace todotxtlib.net.tests
 		{
 			var task = new Task("This task contains the phone number 720-564-1231");
 
-			Assert.True(task.Metadata["phone"] == "720-564-1231"); 
+			Assert.Equal("720-564-1231", task.Metadata["phone"]); 
 		}
 
 		[Fact]
@@ -289,7 +289,7 @@ namespace todotxtlib.net.tests
 		{
 			var task = new Task("This task contains an explicit phone number phone:720-564-1231");
 
-			Assert.True(task.Metadata["phone"] == "720-564-1231"); 
+			Assert.Equal("720-564-1231", task.Metadata["phone"]); 
 		}
 
 		[Fact]
@@ -318,14 +318,14 @@ namespace todotxtlib.net.tests
 		{
 			var task = new Task("This task contains an explicit phone:720-564-1231 and another 317-228-1231");
 
-			Assert.True(task.Metadata["phone"] == "720-564-1231");
-			Assert.True(task.Metadata["phone1"] == "317-228-1231");
+			Assert.Equal("720-564-1231", task.Metadata["phone"]);
+			Assert.Equal("317-228-1231", task.Metadata["phone1"]);
 
 			// Different order; explicit metadata should still be first
 			task = new Task("This task contains a number 720-564-1231 and another phone:317-228-1231 ");
 
-			Assert.True(task.Metadata["phone"] == "317-228-1231");
-			Assert.True(task.Metadata["phone1"] == "720-564-1231");
+			Assert.Equal("317-228-1231", task.Metadata["phone"]);
+			Assert.Equal("720-564-1231", task.Metadata["phone1"]);
 		}
 
         [Fact]
@@ -335,7 +335,7 @@ namespace todotxtlib.net.tests
 
             var task = new Task("This task contains a project with a hypen +hyphen-project @home");
 
-            Assert.True(task.Projects.Contains("+hyphen-project"));
+            Assert.Contains("+hyphen-project", task.Projects);
         }
 
         [Fact]
@@ -345,7 +345,7 @@ namespace todotxtlib.net.tests
 
             var task = new Task("This task contains a project with a hypen @hyphen-context @home");
 
-            Assert.True(task.Contexts.Contains("@hyphen-context"));
+            Assert.Contains("@hyphen-context", task.Contexts);
         }
 
         [Fact]
@@ -355,9 +355,9 @@ namespace todotxtlib.net.tests
 
             var task = new Task("This task has only one project with a hyphen in it +hyphen-project +nohyphen-");
 
-            Assert.True(task.Projects.Contains("+hyphen-project"));
-            Assert.False(task.Projects.Contains("+nohyphen-"));
-            Assert.True(task.Projects.Contains("+nohyphen"));
+            Assert.Contains("+hyphen-project", task.Projects);
+            Assert.DoesNotContain("+nohyphen-", task.Projects);
+            Assert.Contains("+nohyphen", task.Projects);
         }
 
         [Fact]
@@ -367,9 +367,9 @@ namespace todotxtlib.net.tests
 
             var task = new Task("This task has only one valid context @hyphen-context @nohyphen-");
 
-            Assert.True(task.Contexts.Contains("@hyphen-context"));
+            Assert.Contains("@hyphen-context", task.Contexts);
             Assert.DoesNotContain("@nohyphen-", task.Contexts);
-            Assert.True(task.Contexts.Contains("@nohyphen"));
+            Assert.Contains("@nohyphen", task.Contexts);
         }
 
         [Fact]
@@ -390,9 +390,9 @@ namespace todotxtlib.net.tests
                 new Task(
                     "due:2014-07-02 Get back to work on project x Ansel 453.456.8967  Jim 432.453.9134  Bob's cell: 812.477.7272");
 
-            Assert.True(task.Metadata["phone"] == "453.456.8967");
-            Assert.True(task.Metadata["phone1"] == "432.453.9134");
-            Assert.True(task.Metadata["phone2"] == "812.477.7272");
+            Assert.Equal("453.456.8967", task.Metadata["phone"]);
+            Assert.Equal("432.453.9134", task.Metadata["phone1"]);
+            Assert.Equal("812.477.7272", task.Metadata["phone2"]);
         }
     }
 }
