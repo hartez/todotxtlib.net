@@ -1,6 +1,9 @@
 todotxtlib.net
 ===============================
 
+_Update February 2026:_
+I've updated this to .NET 10 so I can keep using it going forward. 
+
 A simple .NET library for working with todo.txt files
 
 The goal of this project is to provide a simple .NET library for working with tasks stored in the [todo.txt](https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format) format. 
@@ -8,8 +11,8 @@ The goal of this project is to provide a simple .NET library for working with ta
 Sub-goals include:
 
 1. Supporting PowerShell
-2. Supporting Silverlight
-3. Supporting Windows Phone 7 (and 7.1)
+2. ~~Supporting Silverlight~~
+3. ~~Supporting Windows Phone 7 (and 7.1)~~
 4. Supporting WPF
 
 Thanks go to [benrhughes](https://github.com/benrhughes) for contributions to the code, better naming conventions, and the bulk of the unit tests.
