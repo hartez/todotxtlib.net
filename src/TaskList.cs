@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace todotxtlib.net
 {
-    public class TaskList : List<Task>
+    public class TaskList : List<NumberedTask>, IOutputTasks
     {
         public static TaskList Merge(TaskList original, TaskList new1, TaskList new2)
         {
@@ -22,7 +22,7 @@ namespace todotxtlib.net
             return result;
         }
 
-        private string _numberFormat;
+        private string NumberFormat => new('0', Count.ToString().Length);
 
         public TaskList()
         {
@@ -31,15 +31,6 @@ namespace todotxtlib.net
         public TaskList(string filePath)
         {
             LoadTasks(filePath);
-        }
-
-        public TaskList(IEnumerable<Task> todos, int parentListItemCount)
-        {
-            _numberFormat = new string('0', parentListItemCount.ToString().Length);
-            foreach (var todo in todos)
-            {
-                Add(todo);
-            }
         }
 
         public override string ToString()
@@ -54,131 +45,122 @@ namespace todotxtlib.net
 
         public IEnumerable<string> ToNumberedOutput()
         {
-            if (string.IsNullOrEmpty(_numberFormat))
-            {
-                _numberFormat = new string('0', Count.ToString().Length);
-            }
+            var numberFormat = NumberFormat;
 
-            for (int n = 0; n < Count; n++)
+            foreach (var task in this)
             {
-                yield return $"{n.ToString(_numberFormat)} {this[n]}";
+                yield return task.ToNumberedString(numberFormat);
             }
         }
 
-        public TaskList ListCompleted()
+        public TaskListView ListCompleted()
         {
-            return new TaskList(from todo in this
-                                where todo.Completed
-                                select todo, Count);
+            return new TaskListView(from numberedTask in this
+                                    where numberedTask.Completed
+                                    select numberedTask);
         }
 
-        public TaskList Search(string term)
+        public TaskListView Search(string term)
         {
             bool include = true;
 
-            if (term.StartsWith("-"))
+            if (term.StartsWith('-'))
             {
                 include = false;
                 term = term[1..];
             }
 
-            return new TaskList(from task in this
-                                where !(include ^ task.ToString().Contains(term, StringComparison.OrdinalIgnoreCase))
-                                select task, Count);
+            return new TaskListView(from numberedTask in this
+                                    where !(include ^ numberedTask.Task.Body.Contains(term, StringComparison.OrdinalIgnoreCase))
+                                    select numberedTask);
         }
 
-        public TaskList GetPriority(char? priority)
+        public TaskListView GetPriority(char? priority)
         {
             if (priority == null)
             {
-                return new TaskList(from todo in this
-                                    where todo.IsPriority
-                                    orderby todo.Priority
-                                    select todo, Count);
+                return new TaskListView(from numberedTask in this
+                                        where numberedTask.IsPriority
+                                        orderby numberedTask.Priority
+                                        select numberedTask);
             }
 
-            return new TaskList(from todo in this
-                                where todo.Priority == priority
-                                select todo, Count);
+            return new TaskListView(from numberedTask in this
+                                    where numberedTask.Priority == priority
+                                    select numberedTask);
         }
 
-        public void SetItemPriority(int index, char priority)
+        public void SetItemPriority(int itemNumber, char priority)
         {
-            this[index] = this[index].WithPriority(priority);
+            var index = itemNumber - 1;
+            var task = GetTask(itemNumber);
+            this[index] = new NumberedTask(itemNumber, task.WithPriority(priority));
         }
 
-        public void MarkCompleted(int index)
+        public void MarkCompleted(int itemNumber)
         {
-            var task = GetTask(index);
-            if (task == null || task.Completed)
+            var index = itemNumber - 1;
+            var task = GetTask(itemNumber);
+            if (task.Completed)
             {
                 return;
             }
 
-            this[index] = task.WithCompleted();
+            this[index] = new NumberedTask(itemNumber, task.WithCompleted());
         }
 
-        public void MarkPending(int index)
+        public void MarkPending(int itemNumber)
         {
-            var task = GetTask(index);
-            if (task == null || task.Completed)
+            var index = itemNumber - 1;
+            var task = GetTask(itemNumber);
+            if (!task.Completed)
             {
                 return;
             }
 
-            this[index] = task.WithPending();
+            this[index] = new NumberedTask(itemNumber, task.WithPending());
         }
 
-        public void ToggleCompleted(int index)
+        public void ToggleCompleted(int itemNumber)
         {
-            var task = GetTask(index);
-            if (task == null)
-            {
-                return;
-            }
+            var index = itemNumber - 1;
+            var task = GetTask(itemNumber);
 
-            this[index] = task.Completed ? task.WithPending() : task.WithCompleted();
+            this[index] = new NumberedTask(itemNumber, task.Completed ? task.WithPending() : task.WithCompleted());
         }
 
-        private bool ReplaceItemText(int index, string oldText, string newText)
+        private bool ReplaceItemText(int itemNumber, string oldText, string newText)
         {
-            var target = GetTask(index);
+            var task = GetTask(itemNumber);
 
-            var replacement = target.WithReplacementText(oldText, newText);
+            var replacement = task.WithReplacementText(oldText, newText);
 
-            if (target == replacement)
+            if (task == replacement)
             {
+                // Nothing changed, so no reason to update the list
                 return false;
             }
 
-            this[index] = replacement;
+            this[itemNumber - 1] = new NumberedTask(itemNumber, replacement);
 
             return true;
         }
 
-        public Task GetTask(int index)
+        public Task GetTask(int itemNumber)
         {
-            if (index >= Count) { return null; }
-
-            return this[index];
+            return this[itemNumber - 1].Task;
         }
 
-        public void AppendToTask(int index, string newText)
+        public void AppendToTask(int itemNumber, string newText)
         {
-            var current = GetTask(index);
-
-            if (current == null) { return; }
-
-            this[index] = current.WithBody(current.Body + newText);
+            var task = GetTask(itemNumber);
+            this[itemNumber - 1] = new NumberedTask(itemNumber, task.WithBody(task.Body + newText));
         }
 
-        public void PrependToTask(int index, string newText)
+        public void PrependToTask(int itemNumber, string newText)
         {
-            var current = GetTask(index);
-
-            if (current == null) { return; }
-
-            this[index] = current.WithBody(newText + current.Body);
+            var task = GetTask(itemNumber);
+            this[itemNumber - 1] = new NumberedTask(itemNumber, task.WithBody(newText + task.Body));
         }
 
         public bool RemoveFromTask(int item, string term)
@@ -186,9 +168,9 @@ namespace todotxtlib.net
             return ReplaceItemText(item, term, string.Empty);
         }
 
-        public TaskList RemoveCompletedTasks(bool preserveLineNumbers)
+        public TaskListView RemoveCompletedTasks(bool preserveLineNumbers)
         {
-            TaskList completed = ListCompleted();
+            TaskListView completed = ListCompleted();
 
             for (int n = Count - 1; n >= 0; n--)
             {
@@ -196,7 +178,7 @@ namespace todotxtlib.net
                 {
                     if (preserveLineNumbers)
                     {
-                        this[n] = Task.Empty;
+                        this[n] = new NumberedTask(n, Task.Empty);
                     }
                     else
                     {
@@ -208,20 +190,25 @@ namespace todotxtlib.net
             return completed;
         }
 
-        public void RemoveTask(int index, bool preserveLineNumbers)
+        public void RemoveTask(int itemNumber, bool preserveLineNumbers = false)
         {
-            Task target = GetTask(index);
-
-            if (target != null)
+            if (preserveLineNumbers)
             {
-                if (preserveLineNumbers)
-                {
-                    this[index] = Task.Empty;
-                }
-                else
-                {
-                    Remove(target);
-                }
+                this[itemNumber - 1] = new NumberedTask(itemNumber, Task.Empty);
+            }
+            else
+            {
+                RemoveAt(itemNumber - 1);
+                RenumberFrom(itemNumber - 1);
+            }
+        }
+
+        private void RenumberFrom(int index)
+        {
+            for (int n = index; n < Count; n++)
+            {
+                var old = this[index];
+                this[index] = new NumberedTask(old.Number - 1, old.Task);
             }
         }
 
@@ -332,26 +319,9 @@ namespace todotxtlib.net
             }
         }
 
-        /// <summary>
-        /// Deletes a task from this list
-        /// </summary>
-        /// <param name="task">The task to delete from the list</param>
-        /// <returns>True if the task was in the list; false otherwise</returns>
-        public bool Delete(Task task)
-        {
-            try
-            {
-                return (Remove(this.First(t => t == task)));
-            }
-            catch (Exception ex)
-            {
-                throw new TaskException("An error occurred while trying to remove your task from the task list file", ex);
-            }
-        }
-
         public void Add(string task)
         {
-            this.Add(Task.Parse(task));
+            Add(new NumberedTask(Count + 1, Task.Parse(task)));
         }
     }
 }

@@ -254,4 +254,6 @@ namespace todotxtlib.net
 
         public static bool operator !=(Task obj1, Task obj2) => !(obj1 == obj2);
     }
+
+    
 }
