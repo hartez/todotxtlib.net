@@ -93,7 +93,7 @@ namespace DiffMatchPatch {
      * @param d Another Diff to compare against.
      * @return true or false.
      */
-    public override bool Equals(Object obj) {
+    public override bool Equals(object obj) {
       // If parameter is null return false.
       if (obj == null) {
         return false;
@@ -101,7 +101,7 @@ namespace DiffMatchPatch {
 
       // If parameter cannot be cast to Diff return false.
       Diff p = obj as Diff;
-      if ((System.Object)p == null) {
+      if ((object)p == null) {
         return false;
       }
 
@@ -394,8 +394,8 @@ namespace DiffMatchPatch {
      */
     private List<Diff> diff_lineMode(string text1, string text2,
                                      DateTime deadline) {
-      // Scan the text on a line-by-line basis first.
-      Object[] b = diff_linesToChars(text1, text2);
+            // Scan the text on a line-by-line basis first.
+            object[] b = diff_linesToChars(text1, text2);
       text1 = (string)b[0];
       text2 = (string)b[1];
       List<string> linearray = (List<string>)b[2];
@@ -606,7 +606,7 @@ namespace DiffMatchPatch {
      *     encoded text2 and the List of unique strings.  The zeroth element
      *     of the List of unique strings is intentionally blank.
      */
-    protected Object[] diff_linesToChars(string text1, string text2) {
+    protected object[] diff_linesToChars(string text1, string text2) {
       List<string> lineArray = new List<string>();
       Dictionary<string, int> lineHash = new Dictionary<string, int>();
       // e.g. linearray[4] == "Hello\n"
@@ -618,7 +618,7 @@ namespace DiffMatchPatch {
 
       string chars1 = diff_linesToCharsMunge(text1, lineArray, lineHash);
       string chars2 = diff_linesToCharsMunge(text2, lineArray, lineHash);
-      return new Object[] { chars1, chars2, lineArray };
+      return new object[] { chars1, chars2, lineArray };
     }
 
     /**
@@ -1052,12 +1052,12 @@ namespace DiffMatchPatch {
       // rather than force total conformity.
       char char1 = one[one.Length - 1];
       char char2 = two[0];
-      bool nonAlphaNumeric1 = !Char.IsLetterOrDigit(char1);
-      bool nonAlphaNumeric2 = !Char.IsLetterOrDigit(char2);
-      bool whitespace1 = nonAlphaNumeric1 && Char.IsWhiteSpace(char1);
-      bool whitespace2 = nonAlphaNumeric2 && Char.IsWhiteSpace(char2);
-      bool lineBreak1 = whitespace1 && Char.IsControl(char1);
-      bool lineBreak2 = whitespace2 && Char.IsControl(char2);
+      bool nonAlphaNumeric1 = !char.IsLetterOrDigit(char1);
+      bool nonAlphaNumeric2 = !char.IsLetterOrDigit(char2);
+      bool whitespace1 = nonAlphaNumeric1 && char.IsWhiteSpace(char1);
+      bool whitespace2 = nonAlphaNumeric2 && char.IsWhiteSpace(char2);
+      bool lineBreak1 = whitespace1 && char.IsControl(char1);
+      bool lineBreak2 = whitespace2 && char.IsControl(char2);
       bool blankLine1 = lineBreak1 && BLANKLINEEND.IsMatch(one);
       bool blankLine2 = lineBreak2 && BLANKLINESTART.IsMatch(two);
 
@@ -1932,9 +1932,9 @@ namespace DiffMatchPatch {
      * @return Two element Object array, containing the new text and an array of
      *      bool values.
      */
-    public Object[] patch_apply(List<Patch> patches, string text) {
+    public object[] patch_apply(List<Patch> patches, string text) {
       if (patches.Count == 0) {
-        return new Object[] { text, new bool[0] };
+        return new object[] { text, new bool[0] };
       }
 
       // Deep copy the patches so that no changes are made to originals.
@@ -2030,7 +2030,7 @@ namespace DiffMatchPatch {
       // Strip the padding off.
       text = text.Substring(nullPadding.Length, text.Length
           - 2 * nullPadding.Length);
-      return new Object[] { text, results };
+      return new object[] { text, results };
     }
 
     /**

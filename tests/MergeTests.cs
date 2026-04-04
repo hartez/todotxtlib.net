@@ -28,7 +28,7 @@ namespace todotxtlib.net.tests
         {
             var checkupTask = _mergeResult.Search("checkup").First();
 
-            Assert.Equal("D", checkupTask.Priority);
+            Assert.Equal('D', checkupTask.Priority);
         }
 
         [Fact]

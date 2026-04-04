@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 
 namespace todotxtlib.net
 {
-    public class TaskList : ObservableCollection<Task>
+    public class TaskList : List<Task>
     {
         public static TaskList Merge(TaskList original, TaskList new1, TaskList new2)
         {
@@ -18,12 +17,12 @@ namespace todotxtlib.net
             var text = diff.patch_apply(patches, new2.ToString());
 
             var result = new TaskList();
-            result.LoadTasksFromString((String)text[0]);
+            result.LoadTasksFromString((string)text[0]);
 
             return result;
         }
 
-        private String _numberFormat;
+        private string _numberFormat;
 
         public TaskList()
         {
@@ -36,7 +35,7 @@ namespace todotxtlib.net
 
         public TaskList(IEnumerable<Task> todos, int parentListItemCount)
         {
-            _numberFormat = new String('0', parentListItemCount.ToString().Length);
+            _numberFormat = new string('0', parentListItemCount.ToString().Length);
             foreach (var todo in todos)
             {
                 Add(todo);
@@ -45,22 +44,25 @@ namespace todotxtlib.net
 
         public override string ToString()
         {
-            return this.Aggregate(String.Empty, (s, task) => s + (s.Length == 0 ? String.Empty : Environment.NewLine) + task.ToString());
+            return this.Aggregate(string.Empty, (s, task) => s + (s.Length == 0 ? string.Empty : Environment.NewLine) + task.ToString());
         }
 
-        public IEnumerable<String> ToOutput()
+        public IEnumerable<string> ToOutput()
         {
             return this.Select(x => x.ToString());
         }
 
-        public IEnumerable<String> ToNumberedOutput()
+        public IEnumerable<string> ToNumberedOutput()
         {
-            if (String.IsNullOrEmpty(_numberFormat))
+            if (string.IsNullOrEmpty(_numberFormat))
             {
-                _numberFormat = new String('0', Count.ToString().Length);
+                _numberFormat = new string('0', Count.ToString().Length);
             }
 
-            return this.Select(x => x.ToString(_numberFormat));
+            for (int n = 0; n < Count; n++)
+            {
+                yield return $"{n.ToString(_numberFormat)} {this[n]}";
+            }
         }
 
         public TaskList ListCompleted()
@@ -70,7 +72,7 @@ namespace todotxtlib.net
                                 select todo, Count);
         }
 
-        public TaskList Search(String term)
+        public TaskList Search(string term)
         {
             bool include = true;
 
@@ -85,68 +87,103 @@ namespace todotxtlib.net
                                 select task, Count);
         }
 
-        public TaskList GetPriority(String priority)
+        public TaskList GetPriority(char? priority)
         {
-            if (!String.IsNullOrEmpty(priority))
+            if (priority == null)
             {
                 return new TaskList(from todo in this
-                                    where todo.Priority == priority
+                                    where todo.IsPriority
+                                    orderby todo.Priority
                                     select todo, Count);
             }
 
             return new TaskList(from todo in this
-                                where todo.IsPriority
-                                orderby todo.Priority
+                                where todo.Priority == priority
                                 select todo, Count);
         }
 
-        public void SetItemPriority(int item, string priority)
+        public void SetItemPriority(int index, char priority)
         {
-            var target = GetTask(item);
-
-            if (target != null)
-            {
-                target.Priority = priority;
-            }
+            this[index] = this[index].WithPriority(priority);
         }
 
-        private bool ReplaceItemText(int item, string oldText, string newText)
+        public void MarkCompleted(int index)
         {
-            var target = GetTask(item);
-
-            if (target != null)
+            var task = GetTask(index);
+            if (task == null || task.Completed)
             {
-                return target.ReplaceItemText(oldText, newText);
+                return;
             }
 
-            return false;
+            this[index] = task.WithCompleted();
         }
 
-        public Task GetTask(int itemNumber)
+        public void MarkPending(int index)
         {
-            return (from todo in this
-                    where todo.ItemNumber == itemNumber
-                    select todo).FirstOrDefault();
+            var task = GetTask(index);
+            if (task == null || task.Completed)
+            {
+                return;
+            }
+
+            this[index] = task.WithPending();
         }
 
-        public void ReplaceInTask(int item, string newText)
+        public void ToggleCompleted(int index)
         {
-            GetTask(item)?.Replace(newText);
+            var task = GetTask(index);
+            if (task == null)
+            {
+                return;
+            }
+
+            this[index] = task.Completed ? task.WithPending() : task.WithCompleted();
         }
 
-        public void AppendToTask(int item, string newText)
+        private bool ReplaceItemText(int index, string oldText, string newText)
         {
-            GetTask(item)?.Append(newText);
+            var target = GetTask(index);
+
+            var replacement = target.WithReplacementText(oldText, newText);
+
+            if (target == replacement)
+            {
+                return false;
+            }
+
+            this[index] = replacement;
+
+            return true;
         }
 
-        public void PrependToTask(int item, string newText)
+        public Task GetTask(int index)
         {
-            GetTask(item)?.Prepend(newText);
+            if (index >= Count) { return null; }
+
+            return this[index];
+        }
+
+        public void AppendToTask(int index, string newText)
+        {
+            var current = GetTask(index);
+
+            if (current == null) { return; }
+
+            this[index] = current.WithBody(current.Body + newText);
+        }
+
+        public void PrependToTask(int index, string newText)
+        {
+            var current = GetTask(index);
+
+            if (current == null) { return; }
+
+            this[index] = current.WithBody(newText + current.Body);
         }
 
         public bool RemoveFromTask(int item, string term)
         {
-            return ReplaceItemText(item, term, String.Empty);
+            return ReplaceItemText(item, term, string.Empty);
         }
 
         public TaskList RemoveCompletedTasks(bool preserveLineNumbers)
@@ -159,7 +196,7 @@ namespace todotxtlib.net
                 {
                     if (preserveLineNumbers)
                     {
-                        this[n].Empty();
+                        this[n] = Task.Empty;
                     }
                     else
                     {
@@ -171,39 +208,30 @@ namespace todotxtlib.net
             return completed;
         }
 
-        public void RemoveTask(int item, bool preserveLineNumbers)
+        public void RemoveTask(int index, bool preserveLineNumbers)
         {
-            Task target = (from todo in this
-                           where todo.ItemNumber == item
-                           select todo).FirstOrDefault();
+            Task target = GetTask(index);
 
             if (target != null)
             {
                 if (preserveLineNumbers)
                 {
-                    target.Empty();
+                    this[index] = Task.Empty;
                 }
                 else
                 {
                     Remove(target);
-
-                    int itemNumber = 1;
-                    foreach (var todo in this)
-                    {
-                        todo.ItemNumber = itemNumber;
-                        itemNumber += 1;
-                    }
                 }
             }
         }
 
-        public void LoadTasksFromString(String text)
+        public void LoadTasksFromString(string text)
         {
             using var sr = new StringReader(text);
             var line = sr.ReadLine();
             while (line != null)
             {
-                Add(new Task(line));
+                Add(line);
                 line = sr.ReadLine();
             }
         }
@@ -226,7 +254,7 @@ namespace todotxtlib.net
 
                 foreach (string line in lines)
                 {
-                    Add(new Task(line));
+                    Add(line);
                 }
             }
             catch (IOException ex)
@@ -235,17 +263,17 @@ namespace todotxtlib.net
             }
         }
 
-        public void LoadTasks(String filePath)
+        public void LoadTasks(string filePath)
         {
             try
             {
                 Clear();
 
-                string[] lines = ReadAllLines(filePath);
+                string[] lines = File.ReadAllLines(filePath);
 
                 foreach (string line in lines)
                 {
-                    Add(new Task(line));
+                    Add(line);
                 }
             }
             catch (IOException ex)
@@ -259,7 +287,7 @@ namespace todotxtlib.net
             try
             {
                 using var sw = new StreamWriter(stream);
-                foreach (var item in Items)
+                foreach (var item in this)
                 {
                     sw.WriteLine(item.ToString());
                 }
@@ -278,7 +306,7 @@ namespace todotxtlib.net
             try
             {
                 using var sw = new StreamWriter(fileStream);
-                foreach (var item in Items)
+                foreach (var item in this)
                 {
                     sw.WriteLine(item.ToString());
                 }
@@ -292,11 +320,11 @@ namespace todotxtlib.net
             }
         }
 
-        public void SaveTasks(String filePath)
+        public void SaveTasks(string filePath)
         {
             try
             {
-                WriteAllLines(filePath, [.. this.Select(t => t.ToString())]);
+                File.WriteAllLines(filePath, [.. this.Select(t => t.ToString())]);
             }
             catch (IOException ex)
             {
@@ -313,7 +341,7 @@ namespace todotxtlib.net
         {
             try
             {
-                return (Remove(this.First(t => t.Raw == task.Raw)));
+                return (Remove(this.First(t => t == task)));
             }
             catch (Exception ex)
             {
@@ -321,47 +349,9 @@ namespace todotxtlib.net
             }
         }
 
-        public void Update(Task currentTask, Task newTask)
+        public void Add(string task)
         {
-            try
-            {
-                int currentIndex = IndexOf(this.First(t => t.Raw == currentTask.Raw));
-
-                this[currentIndex] = newTask;
-            }
-            catch (Exception ex)
-            {
-                throw new TaskException("An error occurred while trying to update your task in the task list file", ex);
-            }
-        }
-
-        // WriteAllLines and ReadAllLines are included here to support Windows Phone
-        // They're available by default in other versions of the .NET framework
-        public static void WriteAllLines(string path, string[] lines)
-        {
-            using var fs = File.Open(path, FileMode.Create, FileAccess.Write);
-            using var sw = new StreamWriter(fs);
-            foreach (string line in lines)
-            {
-                sw.WriteLine(line);
-            }
-
-            sw.Flush();
-        }
-
-        public static string[] ReadAllLines(string path)
-        {
-            var lines = new List<string>();
-
-            using (var fs = File.OpenRead(path))
-            {
-                using var sr = new StreamReader(fs);
-                while (!sr.EndOfStream)
-                {
-                    lines.Add(sr.ReadLine());
-                }
-            }
-            return [.. lines];
+            this.Add(Task.Parse(task));
         }
     }
 }

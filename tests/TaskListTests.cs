@@ -32,22 +32,19 @@ namespace todotxtlib.net.tests
         [Fact]
         public void Add_Multiple()
         {
-            var tl = new TaskList(_testDataPath);
-            int c = tl.Count;
+            var taskList = new TaskList(_testDataPath);
+            int c = taskList.Count;
 
-            var task = new Task("Add_Multiple task one");
-            tl.Add(task);
+            taskList.Add("Add_Multiple task one");
+            taskList.Add("Add_Multiple task two");
 
-            var task2 = new Task("Add_Multiple task two");
-            tl.Add(task2);
-
-            Assert.Equal(c + 2, tl.Count);
+            Assert.Equal(c + 2, taskList.Count);
         }
 
         [Fact]
         public void Add_ToCollection()
         {
-            var task = new Task("(B) Add_ToCollection +test @task");
+            var task = Task.Parse("(B) Add_ToCollection +test @task");
 
             var tl = new TaskList(_testDataPath);
 
@@ -73,9 +70,8 @@ namespace todotxtlib.net.tests
             List<string> fileContents = [.. File.ReadAllLines(tempTaskFile)];
             fileContents.Add("(B) Add_ToFile +test @task");
 
-            var task = new Task(fileContents.Last());
             var tl = new TaskList(tempTaskFile);
-            tl.Add(task);
+            tl.Add(fileContents.Last());
             tl.SaveTasks(tempTaskFile);
 
             string[] newFileContents = File.ReadAllLines(tempTaskFile);
@@ -115,7 +111,7 @@ namespace todotxtlib.net.tests
 
             var tl = new TaskList(tempTaskFile)
             {
-                new Task("A task")
+                "A task"
             };
 
             Assert.Single(tl);
@@ -133,16 +129,15 @@ namespace todotxtlib.net.tests
         [Fact]
         public void Delete_InCollection()
         {
-            var task = new Task("(B) Delete_InCollection +test @task");
             var tl = new TaskList(_testDataPath)
             {
-                task
+                "(B) Delete_InCollection +test @task"
             };
 
             List<Task> tasks = [.. tl];
             tasks.Remove(tasks.Last());
 
-            tl.Delete(task);
+            tl.Delete(tl.Last());
 
             List<Task> newTasks = [.. tl];
 
@@ -160,7 +155,7 @@ namespace todotxtlib.net.tests
             {
                 string[] fileLines = File.ReadAllLines(tempTasksFile);
                 List<string> fileContents = [.. fileLines];
-                var task = new Task(fileContents.Last());
+                var task = Task.Parse(fileContents.Last());
                 fileContents.Remove(fileContents.Last());
 
                 var tl = new TaskList(tempTasksFile);
@@ -213,55 +208,29 @@ namespace todotxtlib.net.tests
         }
 
         [Fact]
-        public void ObservableChanges()
-        {
-            var tl = new TaskList();
-
-            bool fired = false;
-
-            tl.CollectionChanged += (sender, e) => { fired = true; };
-
-            tl.LoadTasks(_testDataPath);
-
-            Assert.True(fired);
-            fired = false;
-
-            tl.Add(new Task("T", null, null, "Test task for observablecollection event firing"));
-
-            Assert.True(fired);
-            fired = false;
-
-            tl[0].PropertyChanged += (sender, e) => { fired = true; };
-
-            tl[0].Append("Test append for propertychanged event firing");
-
-            Assert.True(fired);
-        }
-
-        [Fact]
         public void Save_To_Stream()
         {
             string tempTaskFile = CreateTempTasksFile();
 
-            var tl = new TaskList();
+            var taskList = new TaskList();
 
             using (FileStream fs = File.OpenRead(tempTaskFile))
             {
-                tl.LoadTasks(fs);
+                taskList.LoadTasks(fs);
             }
 
-            tl.Add(new Task("This task should end up in both lists"));
+            taskList.Add("This task should end up in both lists");
 
             string tempTaskFileCopy = CreateTempTasksFile();
 
             using (FileStream fs = File.OpenWrite(tempTaskFileCopy))
             {
-                tl.SaveTasks(fs);
+                taskList.SaveTasks(fs);
             }
 
             var tl2 = new TaskList(tempTaskFileCopy);
 
-            Assert.Equal(tl.Count, tl2.Count);
+            Assert.Equal(taskList.Count, tl2.Count);
         }
 
         [Fact]
@@ -291,68 +260,37 @@ namespace todotxtlib.net.tests
         public void ToggleComplete_Off_InCollection()
         {
             // Not complete - doesn't include completed date
-            var task = new Task("X (B) ToggleComplete_Off_InCollection +test @task");
-            var tl = new TaskList(_testDataPath)
+            var taskList = new TaskList(_testDataPath)
             {
-                task
+                "X (B) ToggleComplete_Off_InCollection +test @task"
             };
 
-            task = tl.Last();
+            var index = taskList.Count - 1;
 
-            task.ToggleCompleted();
+            taskList.ToggleCompleted(index);
 
-            task = tl.Last();
+            Assert.True(taskList.Last().Completed);
 
-            Assert.True(task.Completed);
+            taskList.Add("x 2011-02-25 ToggleComplete_Off_InCollection +test @task");
 
-            var task2 = new Task("X 2011-02-25 ToggleComplete_Off_InCollection +test @task");
+            index = taskList.Count - 1;
 
-            tl.Add(task2);
+            taskList.ToggleCompleted(index);
 
-            task = tl.Last();
-
-            task.ToggleCompleted();
-
-            task = tl.Last();
-
-            Assert.False(task.Completed);
+            Assert.False(taskList.Last().Completed);
         }
 
         [Fact]
         public void ToggleComplete_On_InCollection()
         {
-            var task = new Task("(B ToggleComplete_On_InCollection +test @task");
-            var tl = new TaskList(_testDataPath)
+            var taskList = new TaskList(_testDataPath)
             {
-                task
+                "(B ToggleComplete_On_InCollection +test @task"
             };
 
-            task = tl.Last();
+            taskList.ToggleCompleted(taskList.Count - 1);
 
-            task.ToggleCompleted();
-
-            task = tl.Last();
-
-            Assert.True(task.Completed);
-        }
-
-        [Fact]
-        public void Update_InCollection()
-        {
-            var task = new Task("(B) Update_InCollection +test @task");
-
-            var tl = new TaskList(_testDataPath)
-            {
-                task
-            };
-
-            var task2 = new Task(task.Raw);
-            task2.ToggleCompleted();
-
-            tl.Update(task, task2);
-
-            Task newTask = tl.Last();
-            Assert.True(newTask.Completed);
+            Assert.True(taskList.Last().Completed);
         }
 
         [Fact]
@@ -369,6 +307,22 @@ the previous line was blank";
 
             Assert.Equal(5, tl.Count);
             Assert.True(tl.Search("previous").Any());
+        }
+
+        [Fact]
+        public void UpdateTaskPriority()
+        {
+            var text = @"this is the first task
+this is the second task
+";
+
+            var tl = new TaskList();
+            tl.LoadTasksFromString(text);
+
+            Assert.Null(tl[0].Priority);
+
+            tl.SetItemPriority(0, 'a');
+            Assert.Equal('A', tl[0].Priority);
         }
     }
 }
