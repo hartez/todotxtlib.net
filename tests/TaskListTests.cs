@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Xunit;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace todotxtlib.net.tests
 {
@@ -19,7 +20,7 @@ namespace todotxtlib.net.tests
         }
 
         [Fact]
-        public void SelectMany()
+        public void AggregateContexts()
         {
             string tempTaskFile = CreateTempTasksFile();
             var taskList = new TaskList(tempTaskFile);
@@ -134,7 +135,8 @@ namespace todotxtlib.net.tests
         public void Load_From_File()
         {
             var tl = new TaskList(_testDataPath);
-            _ = tl.AsEnumerable();
+            Assert.Equal(8, tl.Count);
+            Assert.Equal("A task", tl.GetTask(1).Body);
         }
 
         [Fact]
@@ -283,6 +285,73 @@ this is the second task
 
             tl.SetItemPriority(1, 'a');
             Assert.Equal('A', tl.GetTask(1).Priority);
+        }
+
+        [Fact]
+        public void MarkCompleteSetsCompletedDate()
+        {
+            var taskList = new TaskList(_testDataPath);
+            taskList.MarkCompleted(8);
+            var task = taskList.GetTask(8);
+
+            Assert.True(task.Completed);
+            Assert.NotNull(task.CompletedDate);
+        }
+
+        [Fact]
+        public void AddDoNotEnsureCreatedDate()
+        {
+            var hasCreatedDate = "2025-04-03 Has a created date";
+            var noCreatedDate = "Has no created date";
+         
+            var taskList = new TaskList();
+
+            taskList.Create(hasCreatedDate, ensureCreatedDate: false);
+            taskList.Create(noCreatedDate, ensureCreatedDate: false);
+            
+            Assert.NotNull(taskList.GetTask(1).CreatedDate);
+            Assert.Null(taskList.GetTask(2).CreatedDate);
+        }
+        
+        [Fact]
+        public void AddEnsureCreatedDate()
+        {
+            var hasCreatedDate = "2025-04-03 Has a created date";
+            var noCreatedDate = "Has no created date";
+         
+            var taskList = new TaskList();
+            
+            taskList.Create(hasCreatedDate, ensureCreatedDate: true);
+            taskList.Create(noCreatedDate, ensureCreatedDate: true);
+            
+            Assert.NotNull(taskList.GetTask(1).CreatedDate);
+            Assert.NotNull(taskList.GetTask(2).CreatedDate);
+
+            // Make sure that we didn't get an extra date dropped into the task that already had one
+            Assert.Equal(hasCreatedDate, taskList.GetTask(1).ToString());
+        }
+
+        [Fact]
+        public void NumbersInStringOutput()
+        { 
+            var taskList = new TaskList()
+            {
+                "this is task 1",
+                "this is task 2",
+                "this is task 3",
+                "this is task 4",
+                "this is task 5",
+                "this is task 6",
+                "this is task 7",
+                "this is task 8",
+                "this is task 9",
+                "this is task 10",
+            };
+
+            var output = taskList.ToString();
+            Assert.Contains("06", output);
+
+            Console.Write(output);
         }
     }
 }

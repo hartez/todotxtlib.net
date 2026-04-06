@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Resources;
 using System.Runtime.InteropServices;
+using Xunit;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -13,3 +14,4 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 
 [assembly: Guid("e0770225-f74d-4d82-8e7b-8725f3910dc3")]
+[assembly: CaptureConsole]

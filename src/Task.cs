@@ -119,7 +119,17 @@ namespace todotxtlib.net
                 return this;
             }
 
-            return new Task(Body, completedDate: CompletedDate, createdDate: CreatedDate);
+            return new Task(Body, completedDate: CompletedDate ?? DateTime.Now, createdDate: CreatedDate);
+        }
+
+        internal Task WithCreatedDate()
+        {
+            if (CreatedDate is not null)
+            {
+                return this;
+            }
+
+            return new Task(Body, priority: Priority, createdDate: DateTime.Now);
         }
 
         internal Task WithPending()
@@ -254,6 +264,4 @@ namespace todotxtlib.net
 
         public static bool operator !=(Task obj1, Task obj2) => !(obj1 == obj2);
     }
-
-    
 }

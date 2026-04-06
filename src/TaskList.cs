@@ -1,28 +1,22 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace todotxtlib.net
 {
-    public class TaskList : List<NumberedTask>, IOutputTasks
+    public class TaskList : IEnumerable<NumberedTask>
     {
-        public static TaskList Merge(TaskList original, TaskList new1, TaskList new2)
+        private readonly List<NumberedTask> _tasks = [];
+
+        public int Count => _tasks.Count;
+
+        private string Format(NumberedTask numberedTask)
         {
-            var diff = new DiffMatchPatch.diff_match_patch();
-            var diffs = diff.diff_main(original.ToString(), new1.ToString());
-
-            var patches = diff.patch_make(original.ToString(), diffs);
-
-            var text = diff.patch_apply(patches, new2.ToString());
-
-            var result = new TaskList();
-            result.LoadTasksFromString((string)text[0]);
-
-            return result;
+            string numberFormat = new('0', Count.ToString().Length);
+            return $"{numberedTask.Number.ToString(numberFormat)} {numberedTask.Task}";
         }
-
-        private string NumberFormat => new('0', Count.ToString().Length);
 
         public TaskList()
         {
@@ -35,32 +29,23 @@ namespace todotxtlib.net
 
         public override string ToString()
         {
-            return this.Aggregate(string.Empty, (s, task) => s + (s.Length == 0 ? string.Empty : Environment.NewLine) + task.ToString());
-        }
-
-        public IEnumerable<string> ToOutput()
-        {
-            return this.Select(x => x.ToString());
+            return _tasks.Aggregate(string.Empty, (acc, numberedTask) =>
+                acc + (acc.Length == 0 ? string.Empty : Environment.NewLine) + numberedTask.ToString());
         }
 
         public IEnumerable<string> ToNumberedOutput()
         {
-            var numberFormat = NumberFormat;
-
-            foreach (var task in this)
-            {
-                yield return task.ToNumberedString(numberFormat);
-            }
+            return _tasks.Select(numberedTask => numberedTask.ToString());
         }
 
-        public TaskListView ListCompleted()
+        public IEnumerable<NumberedTask> ListCompleted()
         {
-            return new TaskListView(from numberedTask in this
-                                    where numberedTask.Completed
-                                    select numberedTask);
+            return from numberedTask in _tasks
+                   where numberedTask.Completed
+                   select numberedTask;
         }
 
-        public TaskListView Search(string term)
+        public IEnumerable<NumberedTask> Search(string term)
         {
             bool include = true;
 
@@ -70,31 +55,31 @@ namespace todotxtlib.net
                 term = term[1..];
             }
 
-            return new TaskListView(from numberedTask in this
-                                    where !(include ^ numberedTask.Task.Body.Contains(term, StringComparison.OrdinalIgnoreCase))
-                                    select numberedTask);
+            return from numberedTask in _tasks
+                   where !(include ^ numberedTask.Task.Body.Contains(term, StringComparison.OrdinalIgnoreCase))
+                   select numberedTask;
         }
 
-        public TaskListView GetPriority(char? priority)
+        public IEnumerable<NumberedTask> GetPriority(char? priority)
         {
             if (priority == null)
             {
-                return new TaskListView(from numberedTask in this
-                                        where numberedTask.IsPriority
-                                        orderby numberedTask.Priority
-                                        select numberedTask);
+                return from numberedTask in _tasks
+                       where numberedTask.IsPriority
+                       orderby numberedTask.Priority
+                       select numberedTask;
             }
 
-            return new TaskListView(from numberedTask in this
-                                    where numberedTask.Priority == priority
-                                    select numberedTask);
+            return from numberedTask in _tasks
+                   where numberedTask.Priority == char.ToUpper(priority.Value)
+                   select numberedTask;
         }
 
         public void SetItemPriority(int itemNumber, char priority)
         {
             var index = itemNumber - 1;
             var task = GetTask(itemNumber);
-            this[index] = new NumberedTask(itemNumber, task.WithPriority(priority));
+            _tasks[index] = new NumberedTask(itemNumber, task.WithPriority(priority), Format);
         }
 
         public void MarkCompleted(int itemNumber)
@@ -106,7 +91,7 @@ namespace todotxtlib.net
                 return;
             }
 
-            this[index] = new NumberedTask(itemNumber, task.WithCompleted());
+            _tasks[index] = new NumberedTask(itemNumber, task.WithCompleted(), Format);
         }
 
         public void MarkPending(int itemNumber)
@@ -118,7 +103,7 @@ namespace todotxtlib.net
                 return;
             }
 
-            this[index] = new NumberedTask(itemNumber, task.WithPending());
+            _tasks[index] = new NumberedTask(itemNumber, task.WithPending(), Format);
         }
 
         public void ToggleCompleted(int itemNumber)
@@ -126,7 +111,7 @@ namespace todotxtlib.net
             var index = itemNumber - 1;
             var task = GetTask(itemNumber);
 
-            this[index] = new NumberedTask(itemNumber, task.Completed ? task.WithPending() : task.WithCompleted());
+            _tasks[index] = new NumberedTask(itemNumber, task.Completed ? task.WithPending() : task.WithCompleted(), Format);
         }
 
         private bool ReplaceItemText(int itemNumber, string oldText, string newText)
@@ -141,26 +126,26 @@ namespace todotxtlib.net
                 return false;
             }
 
-            this[itemNumber - 1] = new NumberedTask(itemNumber, replacement);
+            _tasks[itemNumber - 1] = new NumberedTask(itemNumber, replacement, Format);
 
             return true;
         }
 
         public Task GetTask(int itemNumber)
         {
-            return this[itemNumber - 1].Task;
+            return _tasks[itemNumber - 1].Task;
         }
 
         public void AppendToTask(int itemNumber, string newText)
         {
             var task = GetTask(itemNumber);
-            this[itemNumber - 1] = new NumberedTask(itemNumber, task.WithBody(task.Body + newText));
+            _tasks[itemNumber - 1] = new NumberedTask(itemNumber, task.WithBody(task.Body + newText), Format);
         }
 
         public void PrependToTask(int itemNumber, string newText)
         {
             var task = GetTask(itemNumber);
-            this[itemNumber - 1] = new NumberedTask(itemNumber, task.WithBody(newText + task.Body));
+            _tasks[itemNumber - 1] = new NumberedTask(itemNumber, task.WithBody(newText + task.Body), Format);
         }
 
         public bool RemoveFromTask(int item, string term)
@@ -168,21 +153,25 @@ namespace todotxtlib.net
             return ReplaceItemText(item, term, string.Empty);
         }
 
-        public TaskListView RemoveCompletedTasks(bool preserveLineNumbers)
+        public IEnumerable<NumberedTask> RemoveCompletedTasks(bool preserveLineNumbers)
         {
-            TaskListView completed = ListCompleted();
+            // TODO the Format method there are attached to may be incorrect if the total number
+            // of tasks drops below the threshold to have the same digits (e.g., from 101 to 99)
+            // We can fix this by creating a custom local format method and copying these to 
+            // a new List using the custom format method
+            IEnumerable<NumberedTask> completed = [.. ListCompleted()];
 
             for (int n = Count - 1; n >= 0; n--)
             {
-                if (this[n].Completed)
+                if (_tasks[n].Completed)
                 {
                     if (preserveLineNumbers)
                     {
-                        this[n] = new NumberedTask(n, Task.Empty);
+                        _tasks[n] = new NumberedTask(n, Task.Empty, Format);
                     }
                     else
                     {
-                        Remove(this[n]);
+                        _tasks.Remove(_tasks[n]);
                     }
                 }
             }
@@ -194,11 +183,11 @@ namespace todotxtlib.net
         {
             if (preserveLineNumbers)
             {
-                this[itemNumber - 1] = new NumberedTask(itemNumber, Task.Empty);
+                _tasks[itemNumber - 1] = new NumberedTask(itemNumber, Task.Empty, Format);
             }
             else
             {
-                RemoveAt(itemNumber - 1);
+                _tasks.RemoveAt(itemNumber - 1);
                 RenumberFrom(itemNumber - 1);
             }
         }
@@ -207,11 +196,12 @@ namespace todotxtlib.net
         {
             for (int n = index; n < Count; n++)
             {
-                var old = this[index];
-                this[index] = new NumberedTask(old.Number - 1, old.Task);
+                var old = _tasks[index];
+                _tasks[index] = new NumberedTask(old.Number - 1, old.Task, Format);
             }
         }
 
+        // TODO drop this
         public void LoadTasksFromString(string text)
         {
             using var sr = new StringReader(text);
@@ -227,7 +217,7 @@ namespace todotxtlib.net
         {
             try
             {
-                Clear();
+                _tasks.Clear();
 
                 var lines = new List<string>();
 
@@ -254,7 +244,7 @@ namespace todotxtlib.net
         {
             try
             {
-                Clear();
+                _tasks.Clear();
 
                 string[] lines = File.ReadAllLines(filePath);
 
@@ -274,7 +264,7 @@ namespace todotxtlib.net
             try
             {
                 using var sw = new StreamWriter(stream);
-                foreach (var item in this)
+                foreach (var item in _tasks)
                 {
                     sw.WriteLine(item.ToString());
                 }
@@ -293,9 +283,9 @@ namespace todotxtlib.net
             try
             {
                 using var sw = new StreamWriter(fileStream);
-                foreach (var item in this)
+                foreach (var numberedTask in _tasks)
                 {
-                    sw.WriteLine(item.ToString());
+                    sw.WriteLine(numberedTask.Task.ToString());
                 }
 
                 sw.Flush();
@@ -311,7 +301,7 @@ namespace todotxtlib.net
         {
             try
             {
-                File.WriteAllLines(filePath, [.. this.Select(t => t.ToString())]);
+                File.WriteAllLines(filePath, [.. _tasks.Select(numberedTask => numberedTask.Task.ToString())]);
             }
             catch (IOException ex)
             {
@@ -319,9 +309,49 @@ namespace todotxtlib.net
             }
         }
 
-        public void Add(string task)
+        public NumberedTask Create(string task, bool ensureCreatedDate = false)
         {
-            Add(new NumberedTask(Count + 1, Task.Parse(task)));
+            var toAdd = Task.Parse(task);
+
+            if (ensureCreatedDate && toAdd.CreatedDate is null)
+            {
+                toAdd = toAdd.WithCreatedDate();
+            }
+
+            var newTask = new NumberedTask(Count + 1, toAdd, Format);
+
+            _tasks.Add(newTask);
+
+            return newTask;
+        }
+
+        public NumberedTask Add(string task)
+        {
+            var newTask = new NumberedTask(Count + 1, Task.Parse(task), Format);
+
+            _tasks.Add(newTask);
+
+            return newTask;
+        }
+
+        public IEnumerator<NumberedTask> GetEnumerator()
+        {
+            return ((IEnumerable<NumberedTask>)_tasks).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable)_tasks).GetEnumerator();
+        }
+
+        internal void Add(NumberedTask task)
+        {
+            _tasks.Add(task);
+        }
+
+        public bool ItemExists(int itemNumber)
+        {
+            return itemNumber <= Count;
         }
     }
 }
