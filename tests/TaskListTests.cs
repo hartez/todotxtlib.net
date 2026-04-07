@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Xunit;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace todotxtlib.net.tests
 {
@@ -53,7 +52,7 @@ namespace todotxtlib.net.tests
 
             var tl = new TaskList(tempTaskFile);
             tl.Add(fileContents.Last());
-            tl.SaveTasks(tempTaskFile);
+            tl.Save(tempTaskFile);
 
             string[] newFileContents = File.ReadAllLines(tempTaskFile);
 
@@ -120,7 +119,7 @@ namespace todotxtlib.net.tests
 
                 var tl = new TaskList(tempTasksFile);
                 tl.RemoveTask(tl.Last().Number);
-                tl.SaveTasks(tempTasksFile);
+                tl.Save(tempTasksFile);
 
                 string[] newFileContents = File.ReadAllLines(tempTasksFile);
                 Assert.Equivalent(fileContents, newFileContents);
@@ -137,61 +136,6 @@ namespace todotxtlib.net.tests
             var tl = new TaskList(_testDataPath);
             Assert.Equal(8, tl.Count);
             Assert.Equal("A task", tl.GetTask(1).Body);
-        }
-
-        [Fact]
-        public void Load_From_Stream_Repeated()
-        {
-            var s = new Stopwatch();
-
-            s.Start();
-            for (int n = 0; n < 500; n++)
-            {
-                using FileStream fs = File.OpenRead(_testDataPath);
-                var tl = new TaskList();
-
-                tl.LoadTasks(fs);
-            }
-            s.Stop();
-
-            Debug.WriteLine(s.Elapsed);
-        }
-
-        [Fact]
-        public void Load_From_Stream()
-        {
-            using FileStream fs = File.OpenRead(_testDataPath);
-            var tl = new TaskList();
-
-            tl.LoadTasks(fs);
-
-            Assert.Equal(8, tl.Count);
-        }
-
-        [Fact]
-        public void Save_To_Stream()
-        {
-            string tempTaskFile = CreateTempTasksFile();
-
-            var taskList = new TaskList();
-
-            using (FileStream fs = File.OpenRead(tempTaskFile))
-            {
-                taskList.LoadTasks(fs);
-            }
-
-            taskList.Add("This task should end up in both lists");
-
-            string tempTaskFileCopy = CreateTempTasksFile();
-
-            using (FileStream fs = File.OpenWrite(tempTaskFileCopy))
-            {
-                taskList.SaveTasks(fs);
-            }
-
-            var tl2 = new TaskList(tempTaskFileCopy);
-
-            Assert.Equal(taskList.Count, tl2.Count);
         }
 
         [Fact]
@@ -256,30 +200,16 @@ namespace todotxtlib.net.tests
         }
 
         [Fact]
-        public void LoadTasksFromString()
-        {
-            var text = @"
-this is the first task
-this is the second task
-
-the previous line was blank";
-
-            var tl = new TaskList();
-            tl.LoadTasksFromString(text);
-
-            Assert.Equal(5, tl.Count);
-            Assert.True(tl.Search("previous").Any());
-        }
-
-        [Fact]
         public void UpdateTaskPriority()
         {
             var text = @"this is the first task
 this is the second task
 ";
 
-            var tl = new TaskList();
-            tl.LoadTasksFromString(text);
+            var tl = new TaskList
+            {
+                text
+            };
 
             Assert.Null(tl.GetTask(1).Priority);
 

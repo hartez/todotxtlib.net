@@ -102,6 +102,11 @@ namespace todotxtlib.net
             return new Task(Body, createdDate: CreatedDate, priority: char.ToUpper(priority));
         }
 
+        internal Task ClearPriority()
+        {
+            return new Task(Body, createdDate: CreatedDate, priority: null);
+        }
+
         internal Task WithBody(string body)
         {
             if (Completed)

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace todotxtlib.net
 {
@@ -82,6 +83,13 @@ namespace todotxtlib.net
             _tasks[index] = new NumberedTask(itemNumber, task.WithPriority(priority), Format);
         }
 
+        public void ClearItemPriority(int itemNumber)
+        {
+            var index = itemNumber - 1;
+            var task = GetTask(itemNumber);
+            _tasks[index] = new NumberedTask(itemNumber, task.ClearPriority(), Format);
+        }
+
         public void MarkCompleted(int itemNumber)
         {
             var index = itemNumber - 1;
@@ -148,6 +156,11 @@ namespace todotxtlib.net
             _tasks[itemNumber - 1] = new NumberedTask(itemNumber, task.WithBody(newText + task.Body), Format);
         }
 
+        public void ReplaceTask(int itemNumber, string newTask, bool ensureCreatedDate = false)
+        {
+            _tasks[itemNumber - 1] = Create(newTask, itemNumber, ensureCreatedDate); 
+        }
+
         public bool RemoveFromTask(int item, string term)
         {
             return ReplaceItemText(item, term, string.Empty);
@@ -198,18 +211,6 @@ namespace todotxtlib.net
             {
                 var old = _tasks[index];
                 _tasks[index] = new NumberedTask(old.Number - 1, old.Task, Format);
-            }
-        }
-
-        // TODO drop this
-        public void LoadTasksFromString(string text)
-        {
-            using var sr = new StringReader(text);
-            var line = sr.ReadLine();
-            while (line != null)
-            {
-                Add(line);
-                line = sr.ReadLine();
             }
         }
 
@@ -278,39 +279,17 @@ namespace todotxtlib.net
             }
         }
 
-        public void SaveTasks(FileStream fileStream)
-        {
-            try
-            {
-                using var sw = new StreamWriter(fileStream);
-                foreach (var numberedTask in _tasks)
-                {
-                    sw.WriteLine(numberedTask.Task.ToString());
-                }
-
-                sw.Flush();
-
-            }
-            catch (IOException ex)
-            {
-                throw new TaskException("There was a problem trying to save your file", ex);
-            }
-        }
-
-        public void SaveTasks(string filePath)
-        {
-            try
-            {
-                File.WriteAllLines(filePath, [.. _tasks.Select(numberedTask => numberedTask.Task.ToString())]);
-            }
-            catch (IOException ex)
-            {
-                throw new TaskException("There was a problem trying to save your file", ex);
-            }
-        }
-
         public NumberedTask Create(string task, bool ensureCreatedDate = false)
         {
+            var newTask = Create(task, Count + 1, ensureCreatedDate);
+
+            _tasks.Add(newTask);
+
+            return newTask;
+        }
+
+        private NumberedTask Create(string task, int number, bool ensureCreatedDate = false)
+        { 
             var toAdd = Task.Parse(task);
 
             if (ensureCreatedDate && toAdd.CreatedDate is null)
@@ -318,20 +297,12 @@ namespace todotxtlib.net
                 toAdd = toAdd.WithCreatedDate();
             }
 
-            var newTask = new NumberedTask(Count + 1, toAdd, Format);
-
-            _tasks.Add(newTask);
-
-            return newTask;
+            return new NumberedTask(number, toAdd, Format);
         }
 
-        public NumberedTask Add(string task)
+        public void Add(string task)
         {
-            var newTask = new NumberedTask(Count + 1, Task.Parse(task), Format);
-
-            _tasks.Add(newTask);
-
-            return newTask;
+            _tasks.Add(new NumberedTask(Count + 1, Task.Parse(task), Format));
         }
 
         public IEnumerator<NumberedTask> GetEnumerator()
