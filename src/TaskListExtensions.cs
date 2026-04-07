@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace todotxtlib.net
@@ -16,18 +15,6 @@ namespace todotxtlib.net
             public IEnumerable<string> ToOutput()
             {
                 return tasks.Select(numberedTask => numberedTask.Task.ToString());
-            }
-
-            public void Save(string filePath)
-            {
-                try
-                {
-                    File.WriteAllLines(filePath, [.. tasks.Select(numberedTask => numberedTask.Task.ToString())]);
-                }
-                catch (IOException ex)
-                {
-                    throw new TaskException("There was a problem trying to save your file", ex);
-                }
             }
         }
     }

@@ -279,6 +279,18 @@ namespace todotxtlib.net
             }
         }
 
+        public void Save(string filePath)
+        {
+            try
+            {
+                File.WriteAllLines(filePath, [.. _tasks.Select(numberedTask => numberedTask.Task.ToString())]);
+            }
+            catch (IOException ex)
+            {
+                throw new TaskException("There was a problem trying to save your file", ex);
+            }
+        }
+
         public NumberedTask Create(string task, bool ensureCreatedDate = false)
         {
             var newTask = Create(task, Count + 1, ensureCreatedDate);
