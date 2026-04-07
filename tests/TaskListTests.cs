@@ -147,12 +147,12 @@ namespace todotxtlib.net.tests
             // There should be two tasks which contain the term 'foo'
             var fooTaskList = tl.Search("foo");
             Assert.NotNull(fooTaskList);
-            Assert.Equal(2, fooTaskList.ToNumberedOutput().Count());
+            Assert.Equal(2, fooTaskList.Count());
 
             // Search should be case insenstive
             var caseInsensitiveTaskList = tl.Search("Foo");
             Assert.NotNull(caseInsensitiveTaskList);
-            Assert.Equal(2, caseInsensitiveTaskList.ToNumberedOutput().Count());
+            Assert.Equal(2, caseInsensitiveTaskList.Count());
 
             // '-' in front of the term should find all tasks without the term
             var notFooTaskList = tl.Search("-foo");
